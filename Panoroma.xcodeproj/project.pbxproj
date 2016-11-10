@@ -7,7 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */; };
 		9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F519C1DD0D47800FAE304 /* main.cpp */; };
+		9F7F51A61DD10B4B00FAE304 /* Mat2d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */; };
+		9F7F51AA1DD1825700FAE304 /* Debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51A81DD1825700FAE304 /* Debugger.cpp */; };
+		9F7F51AD1DD22EA300FAE304 /* MatXd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51AB1DD22EA300FAE304 /* MatXd.cpp */; };
+		9F7F51B01DD287DF00FAE304 /* Mat3d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51AE1DD287DF00FAE304 /* Mat3d.cpp */; };
+		9F7F51B71DD2D87300FAE304 /* imgproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51B51DD2D87300FAE304 /* imgproc.cpp */; };
+		9F7F51BA1DD2D8FA00FAE304 /* imgio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */; };
+		9F7F51BD1DD2DD0600FAE304 /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */; };
+		9F7F51BF1DD2E70E00FAE304 /* libjpeg.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +32,25 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GaussianPyramid.cpp; sourceTree = "<group>"; };
+		9F2E2AE71DD4EF380091B3B7 /* GaussianPyramid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GaussianPyramid.hpp; sourceTree = "<group>"; };
 		9F7F51991DD0D47800FAE304 /* Panoroma */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Panoroma; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F7F519C1DD0D47800FAE304 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mat2d.cpp; sourceTree = "<group>"; };
+		9F7F51A51DD10B4B00FAE304 /* Mat2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Mat2d.hpp; sourceTree = "<group>"; };
+		9F7F51A81DD1825700FAE304 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Debugger.cpp; sourceTree = "<group>"; };
+		9F7F51A91DD1825700FAE304 /* Debugger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Debugger.hpp; sourceTree = "<group>"; };
+		9F7F51AB1DD22EA300FAE304 /* MatXd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatXd.cpp; sourceTree = "<group>"; };
+		9F7F51AC1DD22EA300FAE304 /* MatXd.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MatXd.hpp; sourceTree = "<group>"; };
+		9F7F51AE1DD287DF00FAE304 /* Mat3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mat3d.cpp; sourceTree = "<group>"; };
+		9F7F51AF1DD287DF00FAE304 /* Mat3d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Mat3d.hpp; sourceTree = "<group>"; };
+		9F7F51B41DD2916000FAE304 /* CImg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CImg.h; sourceTree = "<group>"; };
+		9F7F51B51DD2D87300FAE304 /* imgproc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgproc.cpp; sourceTree = "<group>"; };
+		9F7F51B61DD2D87300FAE304 /* imgproc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgproc.hpp; sourceTree = "<group>"; };
+		9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgio.cpp; sourceTree = "<group>"; };
+		9F7F51B91DD2D8FA00FAE304 /* imgio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgio.hpp; sourceTree = "<group>"; };
+		9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
+		9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.8.dylib; path = ../../../../../usr/local/Cellar/jpeg/8d/lib/libjpeg.8.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F7F51BF1DD2E70E00FAE304 /* libjpeg.8.dylib in Frameworks */,
+				9F7F51BD1DD2DD0600FAE304 /* libX11.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +71,7 @@
 			children = (
 				9F7F519B1DD0D47800FAE304 /* Panoroma */,
 				9F7F519A1DD0D47800FAE304 /* Products */,
+				9F7F51BB1DD2DD0600FAE304 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,9 +86,57 @@
 		9F7F519B1DD0D47800FAE304 /* Panoroma */ = {
 			isa = PBXGroup;
 			children = (
+				9F7F51B21DD28EB400FAE304 /* 3rdparty */,
+				9F7F51B11DD28EA900FAE304 /* feature2d */,
+				9F7F51A31DD10B2A00FAE304 /* utils */,
 				9F7F519C1DD0D47800FAE304 /* main.cpp */,
 			);
 			path = Panoroma;
+			sourceTree = "<group>";
+		};
+		9F7F51A31DD10B2A00FAE304 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */,
+				9F7F51A51DD10B4B00FAE304 /* Mat2d.hpp */,
+				9F7F51A81DD1825700FAE304 /* Debugger.cpp */,
+				9F7F51A91DD1825700FAE304 /* Debugger.hpp */,
+				9F7F51AB1DD22EA300FAE304 /* MatXd.cpp */,
+				9F7F51AC1DD22EA300FAE304 /* MatXd.hpp */,
+				9F7F51AE1DD287DF00FAE304 /* Mat3d.cpp */,
+				9F7F51AF1DD287DF00FAE304 /* Mat3d.hpp */,
+				9F7F51B51DD2D87300FAE304 /* imgproc.cpp */,
+				9F7F51B61DD2D87300FAE304 /* imgproc.hpp */,
+				9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */,
+				9F7F51B91DD2D8FA00FAE304 /* imgio.hpp */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
+		9F7F51B11DD28EA900FAE304 /* feature2d */ = {
+			isa = PBXGroup;
+			children = (
+				9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */,
+				9F2E2AE71DD4EF380091B3B7 /* GaussianPyramid.hpp */,
+			);
+			name = feature2d;
+			sourceTree = "<group>";
+		};
+		9F7F51B21DD28EB400FAE304 /* 3rdparty */ = {
+			isa = PBXGroup;
+			children = (
+				9F7F51B41DD2916000FAE304 /* CImg.h */,
+			);
+			path = 3rdparty;
+			sourceTree = "<group>";
+		};
+		9F7F51BB1DD2DD0600FAE304 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */,
+				9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +196,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F7F51AD1DD22EA300FAE304 /* MatXd.cpp in Sources */,
+				9F7F51AA1DD1825700FAE304 /* Debugger.cpp in Sources */,
+				9F7F51A61DD10B4B00FAE304 /* Mat2d.cpp in Sources */,
+				9F7F51BA1DD2D8FA00FAE304 /* imgio.cpp in Sources */,
 				9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */,
+				9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */,
+				9F7F51B01DD287DF00FAE304 /* Mat3d.cpp in Sources */,
+				9F7F51B71DD2D87300FAE304 /* imgproc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +300,20 @@
 		9F7F51A11DD0D47800FAE304 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					cimg_use_jpeg,
+				);
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/x11/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/x11/lib,
+					/opt/X11/lib,
+					/usr/local/Cellar/jpeg/8d/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -223,6 +321,15 @@
 		9F7F51A21DD0D47800FAE304 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/x11/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/x11/lib,
+					/opt/X11/lib,
+					/usr/local/Cellar/jpeg/8d/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -246,6 +353,7 @@
 				9F7F51A21DD0D47800FAE304 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
