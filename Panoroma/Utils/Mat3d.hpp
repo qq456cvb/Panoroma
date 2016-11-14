@@ -10,7 +10,9 @@
 #define Mat3d_hpp
 
 #include <stdio.h>
+#include <algorithm>
 #include "MatXd.hpp"
+#include <iostream>
 
 template<typename T>
 class Mat3d : public MatXd<T> {
@@ -25,31 +27,39 @@ public:
     ~Mat3d() {
     }
     Mat3d(const Mat3d& mat) : Mat3d(mat.n_rows(), mat.n_cols(), mat.n_channels()){
-        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elems());
     }
 
     
     Mat3d<T>& operator=(Mat3d<T>&& mat) {
-        if (this->raw_data_ && this->n_elems_ != mat.n_elem()) {
-            delete [] this->raw_data_;
-            this->raw_data_ = new T[mat.n_elem()];
+        if (this->n_elems_ != mat.n_elems()) {
+            if (this->raw_data_) {
+                delete [] this->raw_data_;
+            }
+            this->raw_data_ = new T[mat.n_elems()];
         }
+        
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         n_channels_ = mat.n_channels();
-        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        this->n_elems_ = mat.n_elems();
+        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
         return *this;
     }
     
     Mat3d<T>& operator=(const Mat3d<T>& mat) {
-        if (this->raw_data_ && this->n_elem_ != mat.n_elem()) {
-            delete [] this->raw_data_;
-            this->raw_data_ = new T[mat.n_elem()];
+        if (this->n_elems_ != mat.n_elems()) {
+            if (this->raw_data_) {
+                delete [] this->raw_data_;
+            }
+            this->raw_data_ = new T[mat.n_elems()];
         }
+        
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         n_channels_ = mat.n_channels();
-        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        this->n_elems_ = mat.n_elems();
+        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
         return *this;
     }
     
@@ -71,6 +81,18 @@ public:
     
     const T& at(int row, int col, int channel) const {
         return *(this->raw_data_ + (row * n_cols_ + col) * n_channels_ + channel);
+    }
+    
+    Mat3d<T> operator-(const Mat3d<T>& mat) {
+        Mat3d<T> result(mat.n_rows(), mat.n_cols(), mat.n_channels());
+        for (int i = 0; i < mat.n_rows(); i++) {
+            for (int j = 0; j < mat.n_cols(); j++) {
+                for (int c = 0; c < mat.n_channels(); c++) {
+                    result.at(i, j, c) = this->at(i, j, c) - mat.at(i, j, c);
+                }
+            }
+        }
+        return result;
     }
 };
 

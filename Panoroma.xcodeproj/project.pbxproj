@@ -17,6 +17,8 @@
 		9F7F51BA1DD2D8FA00FAE304 /* imgio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */; };
 		9F7F51BD1DD2DD0600FAE304 /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */; };
 		9F7F51BF1DD2E70E00FAE304 /* libjpeg.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */; };
+		9FAE002E1DD656EF0076E8B2 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FAE002C1DD656EF0076E8B2 /* Common.cpp */; };
+		9FB95CEF1DDA17BB0041DC8D /* SIFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FB95CED1DDA17BB0041DC8D /* SIFT.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -51,6 +53,10 @@
 		9F7F51B91DD2D8FA00FAE304 /* imgio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgio.hpp; sourceTree = "<group>"; };
 		9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.8.dylib; path = ../../../../../usr/local/Cellar/jpeg/8d/lib/libjpeg.8.dylib; sourceTree = "<group>"; };
+		9FAE002C1DD656EF0076E8B2 /* Common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Common.cpp; sourceTree = "<group>"; };
+		9FAE002D1DD656EF0076E8B2 /* Common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Common.hpp; sourceTree = "<group>"; };
+		9FB95CED1DDA17BB0041DC8D /* SIFT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SIFT.cpp; sourceTree = "<group>"; };
+		9FB95CEE1DDA17BB0041DC8D /* SIFT.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SIFT.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +115,8 @@
 				9F7F51B61DD2D87300FAE304 /* imgproc.hpp */,
 				9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */,
 				9F7F51B91DD2D8FA00FAE304 /* imgio.hpp */,
+				9FAE002C1DD656EF0076E8B2 /* Common.cpp */,
+				9FAE002D1DD656EF0076E8B2 /* Common.hpp */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -118,6 +126,8 @@
 			children = (
 				9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */,
 				9F2E2AE71DD4EF380091B3B7 /* GaussianPyramid.hpp */,
+				9FB95CED1DDA17BB0041DC8D /* SIFT.cpp */,
+				9FB95CEE1DDA17BB0041DC8D /* SIFT.hpp */,
 			);
 			name = feature2d;
 			sourceTree = "<group>";
@@ -198,12 +208,14 @@
 			files = (
 				9F7F51AD1DD22EA300FAE304 /* MatXd.cpp in Sources */,
 				9F7F51AA1DD1825700FAE304 /* Debugger.cpp in Sources */,
+				9FAE002E1DD656EF0076E8B2 /* Common.cpp in Sources */,
 				9F7F51A61DD10B4B00FAE304 /* Mat2d.cpp in Sources */,
 				9F7F51BA1DD2D8FA00FAE304 /* imgio.cpp in Sources */,
 				9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */,
 				9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */,
 				9F7F51B01DD287DF00FAE304 /* Mat3d.cpp in Sources */,
 				9F7F51B71DD2D87300FAE304 /* imgproc.cpp in Sources */,
+				9FB95CEF1DDA17BB0041DC8D /* SIFT.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

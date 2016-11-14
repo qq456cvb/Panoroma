@@ -29,10 +29,10 @@ public:
     }
     
     Mat2d(const Mat2d& mat) : Mat2d(mat.n_rows(), mat.n_cols()){
-        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elems());
     }
     
-    int n_elem() const {
+    int n_elems() const {
         return n_cols_ * n_rows_;
     }
     
@@ -45,26 +45,32 @@ public:
     }
     
     Mat2d<T>& operator=(Mat2d<T>&& mat) {
-        if (this->raw_data_ && this->n_elems_ != mat.n_elem()) {
-            delete [] this->raw_data_;
-            this->raw_data_ = new T[mat.n_elem()];
+        if (this->n_elems_ != mat.n_elems()) {
+            if (this->raw_data_) {
+                delete [] this->raw_data_;
+            }
+            this->raw_data_ = new T[mat.n_elems()];
         }
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
-        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        this->n_elems_ = mat.n_elems();
+        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
         return *this;
     }
     
     Mat2d<T>& operator=(const Mat2d<T>& mat) {
-        if (this->raw_data_ && this->n_elem_ != mat.n_elem()) {
-            delete [] this->raw_data_;
-            this->raw_data_ = new T[mat.n_elem()];
+        if (this->n_elems_ != mat.n_elems()) {
+            if (this->raw_data_) {
+                delete [] this->raw_data_;
+            }
+            this->raw_data_ = new T[mat.n_elems()];
         }
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
-        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elem());
+        this->n_elems_ = mat.n_elems();
+        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
         return *this;
     }
     

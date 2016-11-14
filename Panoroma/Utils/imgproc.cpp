@@ -33,6 +33,24 @@ Image rgb2gray(const Image& mat) {
     return result;
 }
 
+Image drawCircle(const Image& img, Point point, Color color, int radius, bool fill) {
+    // TODO: support single channel
+    Assert(img.n_channels() == 3);
+    Image result = img;
+    float delta_angle = atan(1. / radius);
+    for (float i = 0; i < 2 * PI; i += delta_angle) {
+        int x = int(cosf(i) * radius + point.x + 0.5);
+        int y = int(sinf(i) * radius + point.y + 0.5);
+        if (x >= 0 && x < img.n_cols()
+            && y >= 0 && y < img.n_rows()) {
+            for (int c = 0; c < img.n_channels(); c++) {
+                result.at(y, x, c) = color[c];
+            }
+        }
+    }
+    return result;
+}
+
 Image gaussianBlur(const Image& mat, float sigma) {
     auto kernel = getGaussianKernel(sigma);
     int radius = kernel.n_rows() / 2;

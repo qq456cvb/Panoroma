@@ -12,28 +12,43 @@
 #include <stdio.h>
 #include "Mat2d.hpp"
 #include "Mat3d.hpp"
+#include "imgproc.hpp"
+#include "imgio.hpp"
 
 struct Laplacian {
     Image image;
     float scale;
+    int octave;
 };
 
 struct DoG {
     Image image;
     float scale;
+    int octave;
 };
 
 class GaussianPyramid {
     int octaves_ = 4;
     int s_ = 3;
     float sigma_ = 1.6;
-    float k = sqrtf(2.);
     bool upsample_ = false;
+    
+public:
     Laplacian* laplacians_;
     DoG* dogs_;
     
-public:
     void build(const Image& img);
+    
+    ~GaussianPyramid() {
+        if (laplacians_) {
+            delete [] laplacians_;
+            laplacians_ = nullptr;
+        }
+        if (dogs_) {
+            delete [] dogs_;
+            dogs_ = nullptr;
+        }
+    }
 };
 
 #endif /* GaussianPyramid_hpp */

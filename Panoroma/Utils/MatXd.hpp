@@ -52,13 +52,13 @@ public:
     
     void set_all(const T& value) {
         T* ptr = raw_data_;
-        for (int i = 0; i < n_elem(); i++) {
+        for (int i = 0; i < n_elems(); i++) {
             *ptr = value;
             ptr++;
         }
     }
     
-    int n_elem() const {
+    int n_elems() const {
         return n_elems_;
     }
     
