@@ -31,7 +31,9 @@ struct KeyPoint {
     float response;
     float orientation;
     float octave;
+    int octave_id;
     float scale;
+    int scale_id;
     KeyPoint() {}
     KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale(0.), orientation(0.) {}
     KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale(kp.scale), orientation(kp.orientation) {}

@@ -13,7 +13,9 @@
 #include <iostream>
 #include <string>
 #include "Eigen/Core"
+#include "Eigen/LU"
 #include "MatXd.hpp"
+#include "Debugger.hpp"
 
 template <typename T>
 class Mat2d : public MatXd<T>{
@@ -45,41 +47,43 @@ public:
     }
     
     Mat2d<T>& operator=(Mat2d<T>&& mat) {
-        if (this->n_elems_ != mat.n_elems()) {
-            if (this->raw_data_) {
-                delete [] this->raw_data_;
-            }
-            this->raw_data_ = new T[mat.n_elems()];
-        }
+        this->raw_data_ = mat.raw_data_;
+        this->dims_ = mat.dims_;
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         this->n_elems_ = mat.n_elems();
-        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
+        this->n_dims_ = mat.n_dims();
         return *this;
     }
     
     Mat2d<T>& operator=(const Mat2d<T>& mat) {
-        if (this->n_elems_ != mat.n_elems()) {
-            if (this->raw_data_) {
-                delete [] this->raw_data_;
-            }
-            this->raw_data_ = new T[mat.n_elems()];
-        }
+        this->raw_data_ = mat.raw_data_;
+        this->dims_ = mat.dims_;
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         this->n_elems_ = mat.n_elems();
-        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
+        this->n_dims_ = mat.n_dims();
         return *this;
     }
     
+    Mat2d<T> clone() const {
+        Mat2d<T> mat(this->n_rows_, this->n_cols_);
+        mat.raw_data_.reset(new T[this->n_elems_], std::default_delete<T[]>());
+        
+        mat.n_elems_ = this->n_elems_;
+        memcpy(mat.raw_ptr(), this->raw_ptr(), sizeof(T) * mat.n_elems());
+        memcpy(mat.dims(), this->dims(), mat.n_dims() * sizeof(int));
+        return mat;
+    }
+    
     const T* operator[](int row) const {
-        return this->raw_data_ + row * n_cols();
+        return this->raw_data_.get() + row * n_cols();
     }
     
     T* operator[](int row) {
-        return this->raw_data_ + row * n_cols();
+        return this->raw_data_.get() + row * n_cols();
     }
     
     
@@ -117,14 +121,24 @@ public:
         }
     }
     
-    Mat2d<T>& operator*=(const Mat2d<T>& mat) {
-        EigenMatrix(*this) *= EigenMatrix(mat);
-        return *this;
-    }
+//    Mat2d<T>& operator*=(const Mat2d<T>& mat) {
+//        EigenMatrix(*this) *= EigenMatrix(mat);
+//        return *this;
+//    }
     
     Mat2d<T> operator*(const Mat2d<T>& mat) {
-        Mat2d<T> result(mat.n_rows(), mat.n_cols());
+        Mat2d<T> result(this->n_rows(), mat.n_cols());
        EigenMatrix(result) =  EigenMatrix(*this) * EigenMatrix(mat);
+        return result;
+    }
+    
+    Mat2d<T> operator/(const float& ratio) {
+        Mat2d<T> result(this->n_rows(), this->n_cols());
+        for (int i = 0; i < n_rows_; i++) {
+            for (int j = 0; j < n_cols_; j++) {
+                result[i][j] /= ratio;
+            }
+        }
         return result;
     }
     
@@ -136,6 +150,39 @@ public:
     Mat2d<T> operator+(const Mat2d<T>& mat) {
         Mat2d<T> result(mat.n_rows(), mat.n_cols());
         EigenMatrix(result) =  EigenMatrix(*this) + EigenMatrix(mat);
+        return result;
+    }
+    
+    Mat2d<T> operator-() {
+        Mat2d<T> result(this->n_rows(), this->n_cols());
+        for (int i = 0; i < n_rows_; i++) {
+            for (int j = 0; j < n_cols_; j++) {
+                result[i][j] = -(*this)[i][j];
+            }
+        }
+        return result;
+    }
+    
+    Mat2d<T> inverse() {
+        Assert(this->n_rows() == this->n_cols());
+        Mat2d<T> result(this->n_rows(), this->n_cols());
+        
+        Eigen::FullPivLU<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> lu(EigenMatrix(*this));
+        if (!lu.isInvertible()) {
+            printf("Matrix not invertible!\n");
+            return result;
+        }
+        EigenMatrix(result) = lu.inverse().eval();
+        return result;
+    }
+    
+    Mat2d<T> transpose() {
+        Mat2d<T> result(this->n_cols(), this->n_rows());
+        for (int i = 0; i < n_rows_; i++) {
+            for (int j = 0; j < n_cols_; j++) {
+                result[j][i] = -(*this)[i][j];
+            }
+        }
         return result;
     }
 };

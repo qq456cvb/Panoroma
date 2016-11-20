@@ -32,34 +32,26 @@ public:
 
     
     Mat3d<T>& operator=(Mat3d<T>&& mat) {
-        if (this->n_elems_ != mat.n_elems()) {
-            if (this->raw_data_) {
-                delete [] this->raw_data_;
-            }
-            this->raw_data_ = new T[mat.n_elems()];
-        }
+        this->raw_data_ = mat.raw_data_;
+        this->dims_ = mat.dims_;
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         n_channels_ = mat.n_channels();
         this->n_elems_ = mat.n_elems();
-        memmove(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
+        this->n_dims_ = mat.n_dims();
         return *this;
     }
     
     Mat3d<T>& operator=(const Mat3d<T>& mat) {
-        if (this->n_elems_ != mat.n_elems()) {
-            if (this->raw_data_) {
-                delete [] this->raw_data_;
-            }
-            this->raw_data_ = new T[mat.n_elems()];
-        }
+        this->raw_data_ = mat.raw_data_;
+        this->dims_ = mat.dims_;
         
         n_cols_ = mat.n_cols();
         n_rows_ = mat.n_rows();
         n_channels_ = mat.n_channels();
         this->n_elems_ = mat.n_elems();
-        memcpy(this->raw_data_, mat.raw_ptr(), sizeof(T) * mat.n_elems());
+        this->n_dims_ = mat.n_dims();
         return *this;
     }
     
@@ -76,11 +68,11 @@ public:
     }
     
     T& at(int row, int col, int channel) {
-        return *(this->raw_data_ + (row * n_cols_ + col) * n_channels_ + channel);
+        return *(this->raw_ptr() + (row * n_cols_ + col) * n_channels_ + channel);
     }
     
     const T& at(int row, int col, int channel) const {
-        return *(this->raw_data_ + (row * n_cols_ + col) * n_channels_ + channel);
+        return *(this->raw_ptr() + (row * n_cols_ + col) * n_channels_ + channel);
     }
     
     Mat3d<T> operator-(const Mat3d<T>& mat) {
@@ -96,7 +88,12 @@ public:
     }
     
     Mat3d<T> clone() const {
-        Mat3d<T> mat = *this;
+        Mat3d<T> mat(this->n_rows_, this->n_cols_, this->n_channels_);
+        mat.raw_data_.reset(new T[this->n_elems_], std::default_delete<T[]>());
+        
+        mat.n_elems_ = this->n_elems_;
+        memcpy(mat.raw_ptr(), this->raw_ptr(), sizeof(T) * mat.n_elems());
+        memcpy(mat.dims(), this->dims(), mat.n_dims() * sizeof(int));
         return mat;
     }
 };
