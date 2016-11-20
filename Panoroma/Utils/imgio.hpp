@@ -16,7 +16,7 @@
 using namespace cimg_library;
 
 
-Mat3d<unsigned char> readImage(const char* file);
-void imageShow(const Mat3d<unsigned char>& img);
+Image readImage(const char* file);
+void imageShow(const Image& img);
 
 #endif /* imgio_hpp */

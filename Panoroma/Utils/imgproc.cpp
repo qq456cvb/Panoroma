@@ -33,10 +33,12 @@ Image rgb2gray(const Image& mat) {
     return result;
 }
 
-Image drawCircle(const Image& img, Point point, Color color, int radius, bool fill) {
+void drawCircle(Image& img, Point point, Color color, int radius, bool fill) {
     // TODO: support single channel
-    Assert(img.n_channels() == 3);
-    Image result = img;
+//    Assert(img.n_channels() == 3);
+    if (img.n_channels() == 1) {
+        color.r = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
+    }
     float delta_angle = atan(1. / radius);
     for (float i = 0; i < 2 * PI; i += delta_angle) {
         int x = int(cosf(i) * radius + point.x + 0.5);
@@ -44,11 +46,10 @@ Image drawCircle(const Image& img, Point point, Color color, int radius, bool fi
         if (x >= 0 && x < img.n_cols()
             && y >= 0 && y < img.n_rows()) {
             for (int c = 0; c < img.n_channels(); c++) {
-                result.at(y, x, c) = color[c];
+                img.at(y, x, c) = color[c];
             }
         }
     }
-    return result;
 }
 
 Image gaussianBlur(const Image& mat, float sigma) {
@@ -58,10 +59,10 @@ Image gaussianBlur(const Image& mat, float sigma) {
     for (int i = 0; i < mat.n_rows(); i++) {
         for (int j = 0; j < mat.n_cols(); j++) {
             for (int c = 0; c < result.n_channels(); c++) {
-                double conv = 0;
+                float conv = 0;
                 for (int m = -radius; m <= radius; m++) {
                     for (int n = -radius; n <= radius; n++) {
-                        unsigned char pixel = 0;
+                        float pixel = 0;
                         if (i+m >= 0 && i+m < mat.n_rows() && j+n >= 0 && j+n < mat.n_cols()) {
                             pixel = mat.at(i+m, j+n, c);
                         }

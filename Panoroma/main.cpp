@@ -11,7 +11,7 @@
 #include "MatXd.hpp"
 #include "imgio.hpp"
 #include "imgproc.hpp"
-#include "GaussianPyramid.hpp"
+#include "SIFT.hpp"
 using namespace std;
 
 int main(int argc, const char * argv[]) {
@@ -20,8 +20,9 @@ int main(int argc, const char * argv[]) {
     auto lena = readImage("lena.jpg");
 //    Mat3d<unsigned char> lena(300, 200, 3);
 //    lena.set_all(128);
-    auto draw = drawCircle(lena, Point(20, 20), BLUE, 10);
-    imageShow(draw);
+//    Image draw = lena.clone();
+//    drawCircle(draw, Point(20, 20), BLUE, 10);
+//    imageShow(draw);
     lena = rgb2gray(lena);
 //    imageShow(lena);
 //    auto blurred = gaussianBlur(lena, 1.3);
@@ -29,8 +30,12 @@ int main(int argc, const char * argv[]) {
 //    imageShow(lena);
 //    lena = upSample(lena, 2);
 //    imageShow(lena);
-    GaussianPyramid gp;
-    gp.build(lena);
+//    GaussianPyramid gp;
+//    gp.build(lena);
+//    imageShow(lena);
+    SIFT sift;
+    sift.extract(lena);
+    
 //    char cmd[128] = "convert";
 //    FILE* pipe = popen(cmd, "r");
 //    Assert(true);

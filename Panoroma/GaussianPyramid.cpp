@@ -13,7 +13,7 @@ Image diff(const Image& img1, const Image& img2) {
     for (int i = 0; i < img1.n_rows(); i++) {
         for (int j = 0; j < img1.n_cols(); j++) {
             for (int c = 0; c < img1.n_channels(); c++) {
-                result.at(i, j, c) = img1.at(i, j, c) - img2.at(i, j, c) + 128;
+                result.at(i, j, c) = std::abs(img1.at(i, j, c) - img2.at(i, j, c));
             }
         }
     }
@@ -30,17 +30,20 @@ void GaussianPyramid::build(const Image &img) {
     
     Image unblurred = img;
     laplacians_[0].image = gaussianBlur(img, sigma_);
-    laplacians_[0].octave = 1;
+    laplacians_[0].octave = 0;
     laplacians_[0].scale = sigma_;
     for (int i = 0; i < octaves_; i++) {
         for (int j = 1; j < s_ + 3; j++) {
             laplacians_[i*(s_+3) + j].image = gaussianBlur(unblurred, sigma_ * powf(k, j));
+            laplacians_[i*(s_+3) + j].octave = i;
             laplacians_[i*(s_+3) + j].scale = sigma_ * powf(k, j);
             dogs_[i*(s_+2) + j-1].image = diff(laplacians_[i*(s_+3) + j].image, laplacians_[i*(s_+3) + j-1].image);
-            dogs_[i*(s_+2) + j-1].scale = laplacians_[i*(s_+3) + j].scale;
+            dogs_[i*(s_+2) + j-1].octave = i;
+            dogs_[i*(s_+2) + j-1].scale = laplacians_[i*(s_+3) + j-1].scale;
         }
         if (i < octaves_ - 1) {
             laplacians_[(i+1)*(s_+3)].image = downSample(laplacians_[i*(s_+3)+s_].image, 2.);
+            laplacians_[(i+1)*(s_+3)].octave = i+1;
             laplacians_[(i+1)*(s_+3)].scale = sigma_;
             unblurred = downSample(unblurred, 2.);
         }
@@ -50,10 +53,10 @@ void GaussianPyramid::build(const Image &img) {
 //        printf("Scale: %f\n", laplacians_[i].scale);
 //    }
     
-    for (int i = 0; i < dog_n; i++) {
-        printf("Scale: %f\n", dogs_[i].scale);
-        imageShow(dogs_[i].image);
-    }
+//    for (int i = 0; i < dog_n; i++) {
+//        printf("Scale: %f\n", dogs_[i].scale);
+//        imageShow(dogs_[i].image);
+//    }
 }
 
 

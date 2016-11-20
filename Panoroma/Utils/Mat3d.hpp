@@ -94,8 +94,13 @@ public:
         }
         return result;
     }
+    
+    Mat3d<T> clone() const {
+        Mat3d<T> mat = *this;
+        return mat;
+    }
 };
 
-typedef Mat3d<unsigned char> Image;
+typedef Mat3d<float> Image;
 
 #endif /* Mat3d_hpp */

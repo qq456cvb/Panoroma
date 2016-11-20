@@ -17,15 +17,33 @@ struct Point {
     float x;
     float y;
     Point(float xx, float yy) : x(xx), y(yy) {}
+    Point(const Point& p) : x(p.x), y(p.y) {}
+    Point() : x(0.), y(0.) {}
+    Point& operator*(float ratio) {
+        this->x *= ratio;
+        this->y *= ratio;
+        return *this;
+    }
+};
+
+struct KeyPoint {
+    Point p;
+    float response;
+    float orientation;
+    float octave;
+    float scale;
+    KeyPoint() {}
+    KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale(0.), orientation(0.) {}
+    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale(kp.scale), orientation(kp.orientation) {}
 };
 
 struct Color {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    Color(unsigned char red,
-          unsigned char green,
-          unsigned char blue) {
+    float r;
+    float g;
+    float b;
+    Color(float red,
+          float green,
+          float blue) {
         r = red;
         g = green;
         b = blue;
@@ -46,9 +64,9 @@ struct Color {
     }
 };
 
-#define RED Color(255, 0, 0)
-#define GREEN Color(0, 255, 0)
-#define BLUE Color(0, 0, 255)
+#define RED Color(1., 0, 0)
+#define GREEN Color(0, 1., 0)
+#define BLUE Color(0, 0, 1.)
 
 #define PI 3.14159
 

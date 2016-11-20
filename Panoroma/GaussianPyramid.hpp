@@ -15,6 +15,7 @@
 #include "imgproc.hpp"
 #include "imgio.hpp"
 
+class SIFT;
 struct Laplacian {
     Image image;
     float scale;
@@ -31,12 +32,14 @@ class GaussianPyramid {
     int octaves_ = 4;
     int s_ = 3;
     float sigma_ = 1.6;
+    
+    // whether upsample the original image
     bool upsample_ = false;
     
-public:
     Laplacian* laplacians_;
     DoG* dogs_;
-    
+public:
+    friend class SIFT;
     void build(const Image& img);
     
     ~GaussianPyramid() {

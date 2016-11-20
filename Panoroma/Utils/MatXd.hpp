@@ -69,5 +69,6 @@ public:
     int* dims() const {
         return dims_;
     }
+
 };
 #endif /* MatXd_hpp */
