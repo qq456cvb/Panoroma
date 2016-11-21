@@ -90,11 +90,11 @@ void SIFT::extract(const Image &img) {
                                 }
                             }
                             
-                            float true_extrema = dog->image.at(kp.p.y, kp.p.x, 0) + (jacobian.transpose() * offset)[0][0] / 2;
+                            float true_extrema = dog_iter->image.at(kp.p.y, kp.p.x, 0) + (jacobian.transpose() * offset)[0][0] / 2;
                             if (!converge) { // do not converge
                                 continue;
                             }
-                            if (true_extrema > CONTRAST_THRESHOLD) {
+                            if (true_extrema > CONTRAST_THRESHOLD / pyramid_.s_) {
                                 float k = powf(2, 1./pyramid_.s_);
                                 kp.p.x += offset[0][0];
                                 kp.p.y += offset[1][0];

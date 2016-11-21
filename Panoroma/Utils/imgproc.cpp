@@ -10,7 +10,7 @@
 #include "Debugger.hpp"
 
 Mat2d<double> getGaussianKernel(float sigma) {
-    int radius = int(3 * sigma + 0.5);
+    int radius = ceil(3 * sigma);
     Mat2d<double> kernel(2*radius+1, 2*radius+1);
     float sigma2 = 2 * powf(sigma, 2);
     for (int i = 0; i < 2 * radius + 1; i++) {

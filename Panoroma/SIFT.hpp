@@ -13,11 +13,11 @@
 #include "GaussianPyramid.hpp"
 #include <vector>
 
-#define CONTRAST_THRESHOLD 5e-4
+#define CONTRAST_THRESHOLD 7e-3
 #define EXTREMA_THRESHOLD 1e-3
 #define EDGE_THRESHOLD 10.0
 #define SUBPIXEL_ITER 4
-#define SUBPIXEL_CONVERGE_THRESHOLD 0.3
+#define SUBPIXEL_CONVERGE_THRESHOLD 0.5
 
 class SIFT {
     GaussianPyramid pyramid_;
