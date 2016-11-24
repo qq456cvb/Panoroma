@@ -98,6 +98,7 @@ void SIFT::extract(const Image &img) {
                                 float k = powf(2, 1./pyramid_.s_);
                                 kp.p.x += offset[0][0];
                                 kp.p.y += offset[1][0];
+                                kp.scale_id += offset[2][0];
                                 kp.scale = pyramid_.sigma_ * powf(k, kp.scale_id);
                                 key_points_.push_back(kp);
                             }
@@ -108,6 +109,10 @@ void SIFT::extract(const Image &img) {
             
         }
     }
+    
+    // post processing, refine keypoints
+    key_points_ = assignOrientation(key_points_);
+    
     
     Image image = img.clone();
     for (int i = 0; i < key_points_.size(); i++) {
@@ -173,5 +178,205 @@ void SIFT::subPixelIter(const KeyPoint& kp, const DoG& dog_up, const DoG& dog, c
 //    std::cout << offset << std::endl;
     
 }
+
+void smoothHist(std::vector<float>& hist) {
+    std::vector<float> prev = hist;
+    for (int i = 0; i < hist.size(); i++) {
+        hist[i] = prev[i-1<0?(hist.size()-1):(i-1)] * 0.25 + prev[i] * 0.5 + prev[i+1>=hist.size()?0:(i+1)] * 0.25;
+    }
+}
+
+void addGoodOriKeypoints(const std::vector<float>& hist, const float threshold, std::vector<KeyPoint>& kps, KeyPoint ref_kp) {
+    for (int i = 0; i < ORI_HISTOGRAMS; i++) {
+        int l = i-1<0?0:(i-1);
+        int r = i+1>= ORI_HISTOGRAMS?(ORI_HISTOGRAMS-1):(i+1);
+        
+        if (hist[i] > hist[l] && hist[i] > hist[r] && hist[i] > threshold) {
+            // find one
+            // newton method interpolation
+            float di = (hist[l] - hist[r]) / 2.;
+            float didi = hist[l] + hist[r] - 2 * hist[i];
+            float offset = di / didi;
+            float true_i = i + offset;
+            float true_ori = true_i / ORI_HISTOGRAMS * 2 * PI;
+            
+            // add it to keypoints
+            KeyPoint kp = ref_kp;
+            kp.orientation = true_ori;
+            kps.push_back(kp);
+        }
+    }
+}
+
+
+std::vector<KeyPoint> SIFT::assignOrientation(const std::vector<KeyPoint> &kps) {
+    std::vector<KeyPoint> results;
+    for (auto& kp : kps) {
+        int round_x = roundf(kp.p.x);
+        int round_y = roundf(kp.p.y);
+        int round_scale_id = roundf(kp.scale_id);
+        
+        auto hist = histogram(pyramid_.laplacians_[kp.octave * (pyramid_.s_ + 3) + round_scale_id].image, round_x, round_y, ORI_HISTOGRAMS, ORI_RADIUS * kp.scale, ORI_SIGMA* kp.scale);
+        
+        for (int i = 0; i < ORI_SMOOTH_PASSES; i++) {
+            smoothHist(hist);
+        }
+        
+        float max_mag = *std::max_element(hist.begin(), hist.end());
+        addGoodOriKeypoints(hist, max_mag * ORI_PEAK_RATIO, results, kp);
+    }
+    
+    return results;
+}
+
+std::vector<float> SIFT::histogram(const Image& img, int x, int y, int n, int radius, float sigma) {
+    std::vector<float> hist;
+    hist.resize(n);
+    
+    // not strictly circle
+    // gaussian weights distribution
+    for (int i = -radius; i <= radius; i++) {
+        for (int j = -radius; j <= radius; j++) {
+            if (x+i < 0 || x+i >= img.n_cols()
+                || y+j < 0 || y +j >= img.n_rows()) {
+                continue;
+            }
+            
+            float dx = img.at(y+j, x+i+1, 0) - img.at(y+j, x+i-1, 0);
+            float dy = img.at(y+j+1, x+i, 0) - img.at(y+j-1, x+i, 0);
+            float mag = sqrtf(powf(dx, 2.)
+                              + powf(dy, 2));
+            float ori = atan2f(dy, dx);
+            // basis is inverted
+            if (ori < 0) { // 0-2PI
+                ori += 2*PI;
+            }
+            
+            float weight = expf(-(i*i+j*j) / (2*sigma*sigma));
+            int bin = roundf(n * ori / (2*PI));
+            if (bin >= n) {
+                bin = 0;
+            }
+            hist[bin] = weight * mag;
+        }
+    }
+    
+    return hist;
+}
+
+void normalize(std::vector<std::vector<std::vector<float>>>& hist) {
+    float len = 0.;
+    for (int i = 0; i < DESC_SIDE; i++) {
+        for (int j = 0; j < DESC_SIDE; j++) {
+            for (int k = 0; k < DESC_HIST; k++) {
+                len += hist[i][j][k] * hist[i][j][k];
+            }
+        }
+    }
+    len = sqrtf(len);
+    for (int i = 0; i < DESC_SIDE; i++) {
+        for (int j = 0; j < DESC_SIDE; j++) {
+            for (int k = 0; k < DESC_HIST; k++) {
+                hist[i][j][k] /= len;
+            }
+        }
+    }
+}
+
+void interpHist(std::vector<std::vector<std::vector<float>>>& hist, float x, float y, float o, float mag) {
+    float d_c = x - floorf(x);
+    float d_r = y - floorf(y);
+    float d_o = o - floorf(o);
+    
+    for (int r = int(floorf(y)), rc = 0; r <= int(floorf(y)) + 1; r++, rc++) {
+        if (r < 0 || r >= DESC_SIDE) {
+            continue;
+        }
+        for (int c = int(floorf(x)), cc = 0; c <= int(floorf(x)) + 1; c++, cc++) {
+            if (c < 0 || c >= DESC_SIDE) {
+                continue;
+            }
+            for (int k = int(floorf(o)), oc = 0; k <= int(floorf(o)) + 1; k++, oc++) {
+                int ori = k;
+                if (k >= DESC_HIST) {
+                    ori = DESC_HIST - 1;
+                }
+                // every position is affected by its (3d) two adjacent values
+                hist[r][c][k] += mag * powf(d_r, rc) * powf(d_r, 1-rc)
+                                                * powf(d_c, cc) * powf(d_c, 1-cc)
+                                                * powf(d_o, oc) * powf(d_o, 1-oc);
+            }
+        }
+    }
+}
+
+void SIFT::compute(const std::vector<KeyPoint> kps, Mat2d<float> &descriptors) {
+    
+    std::vector<std::vector<std::vector<float>>> hist;
+    hist.resize(DESC_SIDE);
+    for (auto& i:hist) {
+        i.resize(DESC_SIDE);
+        for (auto& k:i) {
+            k.resize(DESC_HIST);
+            for (auto& num:k) {
+                num = 0.;
+            }
+        }
+    }
+    
+    for (int i = 0; i < kps.size(); i++) {
+        auto kp = kps[i];
+        float hist_diameter = 3 * kp.scale;
+        // add one more desc side for interpolation
+        // add 0.5 to ceil
+        int radius = hist_diameter * sqrtf(2.) * (DESC_SIDE + 1) / 2. + 0.5;
+        
+        float ori = kp.orientation;
+        float cos = cosf(ori);
+        float sin = sinf(ori);
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                // rotating basis equals to ratote the point in reverse direction
+                float x_rot = (cos * x + sin * y) / hist_diameter;
+                float y_rot = (-sin * x + cos * y) / hist_diameter;
+                
+                float x_bin = x_rot + DESC_SIDE * 2 - 0.5;
+                float y_bin = y_rot + DESC_SIDE * 2 - 0.5;
+                
+                if (x_bin > -1 && x_bin < DESC_SIDE
+                    && y_bin > -1 && y_bin < DESC_SIDE) {
+                    Image img = pyramid_.laplacians_[kp.octave * (pyramid_.s_ + 3) + int(roundf(kp.scale_id))].image;
+                    
+                    int c = int(roundf(kp.p.x)) + x;
+                    int r = int(roundf(kp.p.y)) + y;
+                    if (r < 0 || r >= img.n_cols()
+                        || c < 0 || c >= img.n_rows()) {
+                        continue;
+                    }
+                    
+                    float dx = img.at(r, c+1, 0) - img.at(r, c-1, 0);
+                    float dy = img.at(r+1, c, 0) - img.at(r-1, c, 0);
+                    float mag = sqrtf(powf(dx, 2.)
+                                      + powf(dy, 2));
+                    float ori = atan2f(dy, dx);
+                    // basis is inverted
+                    if (ori < 0) { // 0-2PI
+                        ori += 2*PI;
+                    }
+                    
+                    float o_bin = ori / (2*PI) * DESC_HIST;
+                    float subregion_weight = expf(-(x_rot * x_rot + y_rot * y_rot) / (2 * (powf(0.5 * DESC_SIDE, 2.))));
+                    interpHist(hist, x_bin, y_bin, o_bin, subregion_weight * mag);
+                }
+            }
+        }
+        
+    }
+    
+}
+
+
+
+
 
 

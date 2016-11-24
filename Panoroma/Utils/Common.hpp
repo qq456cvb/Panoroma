@@ -29,14 +29,16 @@ struct Point {
 struct KeyPoint {
     Point p;
     float response;
+    // 0~2PI catison coordinate
     float orientation;
-    float octave;
-    int octave_id;
+    int octave;
+    // scale in octave
     float scale;
-    int scale_id;
+    // sub scale id
+    float scale_id;
     KeyPoint() {}
-    KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale(0.), orientation(0.) {}
-    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale(kp.scale), orientation(kp.orientation) {}
+    KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale(0.), orientation(0.), scale_id(0.) {}
+    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale(kp.scale), orientation(kp.orientation), scale_id(kp.scale_id) {}
 };
 
 struct Color {
