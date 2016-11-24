@@ -25,6 +25,8 @@
 #define ORI_PEAK_RATIO 0.8
 #define DESC_SIDE 4
 #define DESC_HIST 8
+#define DESC_THRESHOLD 0.2
+
 
 class SIFT {
     GaussianPyramid pyramid_;
@@ -38,8 +40,9 @@ class SIFT {
 public:
     void extract(const Image& img);
     
+    void computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc);
     // compute descriptors;
-    void compute(const std::vector<KeyPoint> kps, Mat2d<float>& descriptors);
+    void compute(const std::vector<KeyPoint> kps, Mat2d<unsigned char>& descriptors);
 };
 
 #endif /* SIFT_hpp */

@@ -310,8 +310,7 @@ void interpHist(std::vector<std::vector<std::vector<float>>>& hist, float x, flo
     }
 }
 
-void SIFT::compute(const std::vector<KeyPoint> kps, Mat2d<float> &descriptors) {
-    
+void SIFT::computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc) {
     std::vector<std::vector<std::vector<float>>> hist;
     hist.resize(DESC_SIDE);
     for (auto& i:hist) {
@@ -324,53 +323,86 @@ void SIFT::compute(const std::vector<KeyPoint> kps, Mat2d<float> &descriptors) {
         }
     }
     
-    for (int i = 0; i < kps.size(); i++) {
-        auto kp = kps[i];
-        float hist_diameter = 3 * kp.scale;
-        // add one more desc side for interpolation
-        // add 0.5 to ceil
-        int radius = hist_diameter * sqrtf(2.) * (DESC_SIDE + 1) / 2. + 0.5;
-        
-        float ori = kp.orientation;
-        float cos = cosf(ori);
-        float sin = sinf(ori);
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                // rotating basis equals to ratote the point in reverse direction
-                float x_rot = (cos * x + sin * y) / hist_diameter;
-                float y_rot = (-sin * x + cos * y) / hist_diameter;
+    float hist_diameter = 3 * kp.scale;
+    // add one more desc side for interpolation
+    // add 0.5 to ceil
+    int radius = hist_diameter * sqrtf(2.) * (DESC_SIDE + 1) / 2. + 0.5;
+    
+    float ori = kp.orientation;
+    float cos = cosf(ori);
+    float sin = sinf(ori);
+    for (int x = -radius; x <= radius; x++) {
+        for (int y = -radius; y <= radius; y++) {
+            // rotating basis equals to ratote the point in reverse direction
+            float x_rot = (cos * x + sin * y) / hist_diameter;
+            float y_rot = (-sin * x + cos * y) / hist_diameter;
+            
+            float x_bin = x_rot + DESC_SIDE * 2 - 0.5;
+            float y_bin = y_rot + DESC_SIDE * 2 - 0.5;
+            
+            if (x_bin > -1 && x_bin < DESC_SIDE
+                && y_bin > -1 && y_bin < DESC_SIDE) {
+                Image img = pyramid_.laplacians_[kp.octave * (pyramid_.s_ + 3) + int(roundf(kp.scale_id))].image;
                 
-                float x_bin = x_rot + DESC_SIDE * 2 - 0.5;
-                float y_bin = y_rot + DESC_SIDE * 2 - 0.5;
+                int c = int(roundf(kp.p.x)) + x;
+                int r = int(roundf(kp.p.y)) + y;
+                if (r < 0 || r >= img.n_cols()
+                    || c < 0 || c >= img.n_rows()) {
+                    continue;
+                }
                 
-                if (x_bin > -1 && x_bin < DESC_SIDE
-                    && y_bin > -1 && y_bin < DESC_SIDE) {
-                    Image img = pyramid_.laplacians_[kp.octave * (pyramid_.s_ + 3) + int(roundf(kp.scale_id))].image;
-                    
-                    int c = int(roundf(kp.p.x)) + x;
-                    int r = int(roundf(kp.p.y)) + y;
-                    if (r < 0 || r >= img.n_cols()
-                        || c < 0 || c >= img.n_rows()) {
-                        continue;
-                    }
-                    
-                    float dx = img.at(r, c+1, 0) - img.at(r, c-1, 0);
-                    float dy = img.at(r+1, c, 0) - img.at(r-1, c, 0);
-                    float mag = sqrtf(powf(dx, 2.)
-                                      + powf(dy, 2));
-                    float ori = atan2f(dy, dx);
-                    // basis is inverted
-                    if (ori < 0) { // 0-2PI
-                        ori += 2*PI;
-                    }
-                    
-                    float o_bin = ori / (2*PI) * DESC_HIST;
-                    float subregion_weight = expf(-(x_rot * x_rot + y_rot * y_rot) / (2 * (powf(0.5 * DESC_SIDE, 2.))));
-                    interpHist(hist, x_bin, y_bin, o_bin, subregion_weight * mag);
+                float dx = img.at(r, c+1, 0) - img.at(r, c-1, 0);
+                float dy = img.at(r+1, c, 0) - img.at(r-1, c, 0);
+                float mag = sqrtf(powf(dx, 2.)
+                                  + powf(dy, 2));
+                float ori = atan2f(dy, dx);
+                // basis is inverted
+                if (ori < 0) { // 0-2PI
+                    ori += 2*PI;
+                }
+                
+                float o_bin = ori / (2*PI) * DESC_HIST;
+                float subregion_weight = expf(-(x_rot * x_rot + y_rot * y_rot) / (2 * (powf(0.5 * DESC_SIDE, 2.))));
+                interpHist(hist, x_bin, y_bin, o_bin, subregion_weight * mag);
+            }
+        }
+    }
+    
+
+    normalize(hist);
+    for (int i = 0; i < DESC_SIDE; i++) {
+        for (int j = 0; j < DESC_SIDE; j++) {
+            for (int k = 0; k < DESC_HIST; k++) {
+                if (hist[i][j][k] > DESC_THRESHOLD) {
+                    hist[i][j][k] = DESC_THRESHOLD;
                 }
             }
         }
+    }
+    normalize(hist);
+
+    desc.resize(DESC_SIDE * DESC_SIDE * DESC_HIST);
+    for (int i = 0; i < DESC_SIDE; i++) {
+        for (int j = 0; j < DESC_SIDE; j++) {
+            for (int k = 0; k < DESC_HIST; k++) {
+                // due to the suggestion by Lowe, scale by 512
+                desc[i * DESC_SIDE * DESC_HIST + j * DESC_HIST + k] = std::min((int)(hist[i][j][k] * 512 + 0.5), 255);
+            }
+        }
+    }
+}
+
+void SIFT::compute(const std::vector<KeyPoint> kps, Mat2d<unsigned char> &descriptors) {
+    
+    descriptors = Mat2d<unsigned char>(static_cast<int>(kps.size()), DESC_SIDE * DESC_SIDE * DESC_HIST);
+    
+    for (int i = 0; i < kps.size(); i++) {
+        std::vector<unsigned char> desc;
+        computeOneKp(kps[i], desc);
         
+        for (int j = 0; j < desc.size(); j++) {
+            descriptors[i][j] = desc[j];
+        }
     }
     
 }
