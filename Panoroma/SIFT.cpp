@@ -302,9 +302,9 @@ void interpHist(std::vector<std::vector<std::vector<float>>>& hist, float x, flo
                     ori = DESC_HIST - 1;
                 }
                 // every position is affected by its (3d) two adjacent values
-                hist[r][c][k] += mag * powf(d_r, rc) * powf(d_r, 1-rc)
-                                                * powf(d_c, cc) * powf(d_c, 1-cc)
-                                                * powf(d_o, oc) * powf(d_o, 1-oc);
+                hist[r][c][k] += mag * powf(d_r, rc) * powf(1-d_r, 1-rc)
+                                                * powf(d_c, cc) * powf(1-d_c, 1-cc)
+                                                * powf(d_o, oc) * powf(1-d_o, 1-oc);
             }
         }
     }
@@ -337,8 +337,8 @@ void SIFT::computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc) {
             float x_rot = (cos * x + sin * y) / hist_diameter;
             float y_rot = (-sin * x + cos * y) / hist_diameter;
             
-            float x_bin = x_rot + DESC_SIDE * 2 - 0.5;
-            float y_bin = y_rot + DESC_SIDE * 2 - 0.5;
+            float x_bin = x_rot + DESC_SIDE / 2 - 0.5;
+            float y_bin = y_rot + DESC_SIDE / 2 - 0.5;
             
             if (x_bin > -1 && x_bin < DESC_SIDE
                 && y_bin > -1 && y_bin < DESC_SIDE) {
