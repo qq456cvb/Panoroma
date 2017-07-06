@@ -33,8 +33,9 @@ int main(int argc, const char * argv[]) {
 //    GaussianPyramid gp;
 //    gp.build(lena);
 //    imageShow(lena);
+    Mat2d<unsigned char> descriptors;
     SIFT sift;
-    sift.extract(lena);
+    sift.extract(lena, descriptors);
     
 //    char cmd[128] = "convert";
 //    FILE* pipe = popen(cmd, "r");

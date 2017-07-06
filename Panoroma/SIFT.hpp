@@ -13,8 +13,8 @@
 #include "GaussianPyramid.hpp"
 #include <vector>
 
-#define CONTRAST_THRESHOLD 7e-3
-#define EXTREMA_THRESHOLD 1e-3
+#define CONTRAST_THRESHOLD 4e-2
+#define EXTREMA_THRESHOLD 0
 #define EDGE_THRESHOLD 10.0
 #define SUBPIXEL_ITER 4
 #define SUBPIXEL_CONVERGE_THRESHOLD 0.5
@@ -33,12 +33,12 @@ class SIFT {
     std::vector<KeyPoint> key_points_;
     
     bool edgeResponse(const KeyPoint& kp, const DoG& dog);
-    void subPixelIter(const KeyPoint& kp, const DoG& dog_up, const DoG& dog, const DoG& dog_down, Mat2d<float>& jacobian, Mat2d<float>& offset);
+    void subPixelIter(int octave, int r, int c, int intvl, Mat2d<float>& jacobian, Mat2d<float>& offset);
     std::vector<KeyPoint> assignOrientation(const std::vector<KeyPoint>& kps);
     std::vector<float> histogram(const Image& img, int x, int y, int n, int radius, float sigma);
     
 public:
-    void extract(const Image& img);
+    void extract(const Image& img, Mat2d<unsigned char> &descriptors);
     
     void computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc);
     // compute descriptors;

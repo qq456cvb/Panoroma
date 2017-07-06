@@ -30,8 +30,8 @@ public:
     ~Mat2d() {
     }
     
-    Mat2d(const Mat2d& mat) : Mat2d(mat.n_rows(), mat.n_cols()){
-        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elems());
+    Mat2d(const Mat2d& mat) : Mat2d(){
+        *this = mat;
     }
     
     int n_elems() const {

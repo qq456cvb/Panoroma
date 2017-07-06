@@ -26,8 +26,8 @@ public:
     };
     ~Mat3d() {
     }
-    Mat3d(const Mat3d& mat) : Mat3d(mat.n_rows(), mat.n_cols(), mat.n_channels()){
-        memcpy(this->raw_ptr(), mat.raw_ptr(), sizeof(T) * mat.n_elems());
+    Mat3d(const Mat3d& mat) : Mat3d(){
+        *this = mat;
     }
 
     

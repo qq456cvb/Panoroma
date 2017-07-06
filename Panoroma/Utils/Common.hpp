@@ -33,12 +33,13 @@ struct KeyPoint {
     float orientation;
     int octave;
     // scale in octave
-    float scale;
-    // sub scale id
-    float scale_id;
+    float scale_oct;
+    int intvl;
+    float sub_intvl;
+    
     KeyPoint() {}
-    KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale(0.), orientation(0.), scale_id(0.) {}
-    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale(kp.scale), orientation(kp.orientation), scale_id(kp.scale_id) {}
+    KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale_oct(0.), orientation(0.), intvl(0), sub_intvl(0.) {}
+    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale_oct(kp.scale_oct), orientation(kp.orientation), intvl(0), sub_intvl(0.f) {}
 };
 
 struct Color {

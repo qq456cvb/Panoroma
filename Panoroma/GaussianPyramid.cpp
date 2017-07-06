@@ -21,17 +21,25 @@ Image diff(const Image& img1, const Image& img2) {
 }
 
 void GaussianPyramid::build(const Image &img) {
-    octaves_ = log2f(std::max(img.n_rows(), img.n_cols())) - 2;
+    octaves_ = log2f(std::min(img.n_rows(), img.n_cols())) - 2;
     float k = powf(2, 1./s_);
     
-    int lap_n = octaves_ * (s_ + 3);
-    int dog_n = octaves_ * (s_ + 2);
-    laplacians_ = new Laplacian[lap_n];
-    dogs_  = new DoG[dog_n];
+    gaussians_.resize(octaves_);
+    for (auto &o : gaussians_) {
+        o.resize(s_ + 3);
+    }
+    dogs_.resize(octaves_);
+    for (auto &o : dogs_) {
+        o.resize(s_ + 3);
+    }
     
-    laplacians_[0].image = img;
-    laplacians_[0].octave = 0;
-    laplacians_[0].scale = sigma_;
+    if (dbl) {
+        gaussians_[0][0].image = gaussianBlur(upSample(img, 2.f), sqrtf(sigma_ * sigma_ - init_sigma_ * init_sigma_ * 4));
+    } else {
+         gaussians_[0][0].image = gaussianBlur(img, sqrtf(sigma_ * sigma_ - init_sigma_ * init_sigma_));
+    }
+    gaussians_[0][0].octave = 0;
+    gaussians_[0][0].scale = sigma_;
     
     float sigma_rel[s_ + 3];
     sigma_rel[0] = sigma_;
@@ -39,29 +47,51 @@ void GaussianPyramid::build(const Image &img) {
     for (int i = 2; i < s_+3; i++) {
         sigma_rel[i] = sigma_rel[i-1] * k;
     }
+    
+    // gaussian pyramid
     for (int i = 0; i < octaves_; i++) {
-        for (int j = 1; j < s_ + 3; j++) {
-            laplacians_[i*(s_+3) + j].image = gaussianBlur(laplacians_[i*(s_+3) + j - 1].image, sigma_rel[j]);
-            laplacians_[i*(s_+3) + j].octave = i;
-            laplacians_[i*(s_+3) + j].scale = sigma_ * powf(k, j);
-            dogs_[i*(s_+2) + j-1].image = diff(laplacians_[i*(s_+3) + j].image, laplacians_[i*(s_+3) + j - 1].image);
-            dogs_[i*(s_+2) + j-1].octave = i;
-            dogs_[i*(s_+2) + j-1].scale = laplacians_[i*(s_+3) + j-1].scale;
-        }
-        if (i < octaves_ - 1) {
-            laplacians_[(i+1)*(s_+3)].image = downSample(laplacians_[i*(s_+3)+s_].image, 2.);
-            laplacians_[(i+1)*(s_+3)].octave = i+1;
-            laplacians_[(i+1)*(s_+3)].scale = sigma_;
+        for (int j = 0; j < s_ + 3; j++) {
+            if (i == 0 && j == 0) {
+                continue;
+            } else if (j == 0) {
+                gaussians_[i][j].image = downSample(gaussians_[i-1][s_].image, 2.);
+                gaussians_[i][j].octave = i;
+                gaussians_[i][j].scale = powf(2.f, i) * sigma_ * powf(k, j);
+            } else {
+                gaussians_[i][j].image = gaussianBlur(gaussians_[i][j-1].image, sigma_rel[j]);
+                gaussians_[i][j].octave = i;
+                gaussians_[i][j].scale = powf(2.f, i) * sigma_ * powf(k, j);
+            }
         }
     }
-//    for (int i = 0; i < lap_n; i++) {
-//        imageShow(laplacians_[i].image);
-//        printf("Scale: %f\n", laplacians_[i].scale);
+    
+    for (int i = 0; i < octaves_; i++) {
+        for (int j = 0; j < s_ + 2; j++) {
+//            imageShow(diff(gaussians_[i][j+1].image, gaussians_[i][j].image));
+            dogs_[i][j].image = gaussians_[i][j+1].image - gaussians_[i][j].image;
+            dogs_[i][j].octave = i;
+            dogs_[i][j].scale = gaussians_[i][j].scale;
+        }
+    }
+    
+//    for (int i = 0; i < octaves_; i++) {
+//        for (int j = 0; i < s_ + 3; j ++) {
+//            printf("Scale: %f\n", gaussians_[i][j].scale);
+//            imageShow(gaussians_[i][j].image);
+//        }
 //    }
     
-//    for (int i = 0; i < dog_n; i++) {
-//        printf("Scale: %f\n", dogs_[i].scale);
-//        imageShow(dogs_[i].image);
+//    for (int i = 0; i < octaves_ - 4; i++) {
+//        for (int j = 0; i < s_ + 2; j ++) {
+////            for (int r = 0; r < dogs_[i][j].image.n_rows(); r++) {
+////                for (int c = 0; c < dogs_[i][j].image.n_cols(); c++) {
+////                    dogs_[i][j].image.at(r,c,0) = (dogs_[i][j].image.at(r,c,0) + 1.) / 2.;
+////                }
+////            }
+//            printf("Scale: %f\n", dogs_[i][j].scale);
+//            imageShow(dogs_[i][j].image);
+//        }
+//        
 //    }
 }
 

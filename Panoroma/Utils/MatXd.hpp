@@ -27,6 +27,7 @@ public:
         n_dims_ = 0;
         n_elems_ = 0;
         raw_data_ = nullptr;
+        dims_ = nullptr;
     };
     MatXd(int n_dim, ...) : MatXd() {
         dims_ = std::shared_ptr<int>(new int[n_dim], std::default_delete<int[]>());
