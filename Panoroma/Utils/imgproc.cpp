@@ -33,6 +33,25 @@ Image rgb2gray(const Image& mat) {
     return result;
 }
 
+void drawLine(Image& img, Point p1, Point p2, Color color) {
+    if (img.n_channels() == 1) {
+        color.r = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
+    }
+    Point dir = p2 - p1;
+    float step = 1.f / std::max(std::fabsf(dir.x), std::fabsf(dir.y));
+    for (float i = 0; i <= 1.f; i += step) {
+        Point p = p1 + dir * i;
+        int x = int(p.x + 0.5f);
+        int y = int(p.y + 0.5f);
+        if (x >= 0 && x < img.n_cols()
+            && y >= 0 && y < img.n_rows()) {
+            for (int c = 0; c < img.n_channels(); c++) {
+                img.at(y, x, c) = color[c];
+            }
+        }
+    }
+}
+
 void drawCircle(Image& img, Point point, Color color, int radius, bool fill) {
     // TODO: support single channel
 //    Assert(img.n_channels() == 3);

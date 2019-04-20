@@ -90,13 +90,15 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
 //                                cout << "passed" << endl;
                                 continue;
                             }
-                            float true_extrema = pyramid_.dogs_[i][kp.intvl].image.at(kp.p.y, kp.p.x, 0) + (jacobian.transpose() * offset)[0][0] * 0.5;
+                            // delta = -H^{-1} J, by second order Taylor expansion, D = D_hat - J^T delta + 0.5 delta^T H delta, substitute delta
+                            // D = D_hat - 0.5 J^T H^{-1} J = D_hat + 0.5 J^T delta
+                            float true_extrema = pyramid_.dogs_[i][kp.intvl].image.at(kp.p.y, kp.p.x, 0) + 0.5 * (jacobian.transpose() * offset)[0][0];
                             
                             if (fabsf(true_extrema) > CONTRAST_THRESHOLD / pyramid_.s_) {
                                 kp.p.x += offset[0][0];
                                 kp.p.y += offset[1][0];
                                 kp.sub_intvl = offset[2][0];
-                                kp.scale_oct = (i+1) * pyramid_.sigma_ * powf(2.f, (kp.intvl + kp.sub_intvl) / pyramid_.s_);
+                                kp.scale_oct = powf(2.f, i) * pyramid_.sigma_ * powf(2.f, (kp.intvl + kp.sub_intvl) / pyramid_.s_);
                                 key_points_.push_back(kp);
                             }
                         }
@@ -114,8 +116,12 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
     Image image = img.clone();
     for (int i = 0; i < key_points_.size(); i++) {
         Point p = key_points_[i].p;
-        p  = p * powf(2, key_points_[i].octave);
-        drawCircle(image, p);
+        p  *= powf(2, key_points_[i].octave);
+        drawCircle(image, p, RED, 3);
+        Point p_target = p;
+        p_target.x += cosf(key_points_[i].orientation) * 3.f;
+        p_target.y -= sinf(key_points_[i].orientation) * 3.f;
+        drawLine(image, p, p_target);
     }
     
     imageShow(image);

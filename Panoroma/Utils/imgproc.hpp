@@ -23,4 +23,5 @@ Image downSample(const Image& mat, float ratio);
 Image upSample(const Image& mat, float ratio, bool interp = true);
 
 void drawCircle(Image& img, Point point, Color color = RED, int radius = 3, bool fill = false);
+void drawLine(Image& img, Point p1, Point p2, Color color = RED);
 #endif /* imgproc_hpp */

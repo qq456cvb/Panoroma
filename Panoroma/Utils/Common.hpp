@@ -19,12 +19,16 @@ struct Point {
     Point(float xx, float yy) : x(xx), y(yy) {}
     Point(const Point& p) : x(p.x), y(p.y) {}
     Point() : x(0.), y(0.) {}
-    Point& operator*(float ratio) {
+    Point& operator*=(float ratio) {
         this->x *= ratio;
         this->y *= ratio;
         return *this;
     }
+    friend Point operator*(const Point&, float);
+    friend Point operator-(const Point&, const Point&);
+    friend Point operator+(const Point&, const Point&);
 };
+
 
 struct KeyPoint {
     Point p;

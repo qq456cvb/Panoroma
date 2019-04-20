@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include "Eigen/Core"
-#include "Eigen/LU"
+#include <Eigen/Core>
+#include <Eigen/LU>
 #include "MatXd.hpp"
 #include "Debugger.hpp"
 

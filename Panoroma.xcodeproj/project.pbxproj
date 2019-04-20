@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F26F2562269A08D009EAC7A /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F26F2552269A08D009EAC7A /* libjpeg.9.dylib */; };
 		9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */; };
 		9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F519C1DD0D47800FAE304 /* main.cpp */; };
 		9F7F51A61DD10B4B00FAE304 /* Mat2d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */; };
@@ -16,7 +17,6 @@
 		9F7F51B71DD2D87300FAE304 /* imgproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51B51DD2D87300FAE304 /* imgproc.cpp */; };
 		9F7F51BA1DD2D8FA00FAE304 /* imgio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51B81DD2D8FA00FAE304 /* imgio.cpp */; };
 		9F7F51BD1DD2DD0600FAE304 /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */; };
-		9F7F51BF1DD2E70E00FAE304 /* libjpeg.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */; };
 		9FAE002E1DD656EF0076E8B2 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FAE002C1DD656EF0076E8B2 /* Common.cpp */; };
 		9FB95CEF1DDA17BB0041DC8D /* SIFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FB95CED1DDA17BB0041DC8D /* SIFT.cpp */; };
 /* End PBXBuildFile section */
@@ -34,6 +34,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9F26F2552269A08D009EAC7A /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/Cellar/jpeg/9c/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
 		9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GaussianPyramid.cpp; sourceTree = "<group>"; };
 		9F2E2AE71DD4EF380091B3B7 /* GaussianPyramid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GaussianPyramid.hpp; sourceTree = "<group>"; };
 		9F7F51991DD0D47800FAE304 /* Panoroma */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Panoroma; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9F7F51BF1DD2E70E00FAE304 /* libjpeg.8.dylib in Frameworks */,
+				9F26F2562269A08D009EAC7A /* libjpeg.9.dylib in Frameworks */,
 				9F7F51BD1DD2DD0600FAE304 /* libX11.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -143,6 +144,7 @@
 		9F7F51BB1DD2DD0600FAE304 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9F26F2552269A08D009EAC7A /* libjpeg.9.dylib */,
 				9F7F51BE1DD2E70E00FAE304 /* libjpeg.8.dylib */,
 				9F7F51BC1DD2DD0600FAE304 /* libX11.6.dylib */,
 			);
@@ -189,6 +191,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 9F7F51901DD0D47800FAE304;
@@ -313,18 +316,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
 					cimg_use_jpeg,
 				);
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/usr/x11/include,
+					/usr/local/Cellar/eigen/3.3.7/include/eigen3/,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/x11/lib,
 					/opt/X11/lib,
-					/usr/local/Cellar/jpeg/8d/lib,
+					/usr/local/Cellar/jpeg/9c/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -336,11 +339,12 @@
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/usr/x11/include,
+					/usr/local/Cellar/eigen/3.3.7/include/eigen3/,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/x11/lib,
 					/opt/X11/lib,
-					/usr/local/Cellar/jpeg/8d/lib,
+					/usr/local/Cellar/jpeg/9c/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
