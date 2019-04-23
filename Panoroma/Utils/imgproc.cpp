@@ -29,7 +29,7 @@ Image rgb2gray(const Image& mat) {
     Image result(mat.n_rows(), mat.n_cols(), 1);
     for (int i = 0; i < result.n_rows(); i++) {
         for (int j = 0; j < result.n_cols(); j++) {
-            result.at(i, j, 0) = mat.at(i, j, 0);
+            result.at(i, j, 0) = 0.299 * mat.at(i, j, 0) + 0.587 * mat.at(i, j, 1) + 0.114 * mat.at(i, j, 2);
         }
     }
     return result;

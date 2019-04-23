@@ -18,7 +18,7 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
             for (int r = 1; r < dog.image.n_rows() - 1; r++) {
                 for (int c = 1; c < dog.image.n_cols() - 1; c++) {
                     float extrema = dog.image.at(r, c, 0);
-                    if (extrema < 1.25 * CONTRAST_THRESHOLD) {
+                    if (fabsf(extrema) < 1.25 * CONTRAST_THRESHOLD) {
                         continue;
                     }
                     bool max = true, min = true;
