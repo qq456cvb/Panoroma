@@ -9,6 +9,12 @@
 #ifndef GaussianPyramid_hpp
 #define GaussianPyramid_hpp
 
+#define N_OCTAVE 4
+#define N_SCALE 4
+#define SIGMA_INIT 0.5
+#define SIGMA_BASE sqrt(2)
+#define SCALE_INTERVAL sqrt(2)
+
 #include <stdio.h>
 #include <vector>
 #include "Mat2d.hpp"
@@ -31,18 +37,21 @@ struct DoG {
 };
 
 class GaussianPyramid {
-    int octaves_ = 4;
-    int s_ = 3;
-    float sigma_ = 1.6;
-    float init_sigma_ = 0.5;
+    int octaves_ = N_OCTAVE;
+    int s_ = N_SCALE;
+    double sigma_ = SIGMA_BASE;
+    double scale_interval_ = SCALE_INTERVAL;
+    double init_sigma_ = SIGMA_INIT;
     bool dbl = false;
     
     // whether upsample the original image
     bool upsample_ = false;
     
-    vector<vector<Gaussian> > gaussians_;
-    vector<vector<DoG> > dogs_;
+    
+    
 public:
+    vector<vector<DoG> > dogs_;
+    vector<vector<Gaussian> > gaussians_;
     friend class SIFT;
     void build(const Image& img);
 };

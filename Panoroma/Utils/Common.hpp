@@ -43,7 +43,7 @@ struct KeyPoint {
     
     KeyPoint() {}
     KeyPoint(const Point& p) : p(p), response(0.), octave(0.), scale_oct(0.), orientation(0.), intvl(0), sub_intvl(0.) {}
-    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale_oct(kp.scale_oct), orientation(kp.orientation), intvl(0), sub_intvl(0.f) {}
+    KeyPoint(const KeyPoint& kp) : p(kp.p), response(kp.response), octave(kp.octave), scale_oct(kp.scale_oct), orientation(kp.orientation), intvl(kp.intvl), sub_intvl(kp.sub_intvl) {}
 };
 
 struct Color {
@@ -77,6 +77,6 @@ struct Color {
 #define GREEN Color(0, 1., 0)
 #define BLUE Color(0, 0, 1.)
 
-#define PI 3.14159
+#define PI 3.1415926535
 
 #endif /* Common_hpp */

@@ -13,18 +13,12 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
     
     for (int i = 0; i < pyramid_.octaves_; i++) {
         for (int j = 1; j < pyramid_.s_ + 1; j++) {
-//            printf("processing extrema at: %d, %d\n", i, j);
             auto dog = pyramid_.dogs_[i][j];
-//            auto dog_up = pyramid_.dogs_[i][j + 1];
-//            auto dog = pyramid_.dogs_[i][j];
-//            auto dog_down = pyramid_.dogs_[i][j - 1];
-//            
-//            std::vector<DoG> set = {dog_down, dog, dog_up};
             // find all extremes
             for (int r = 1; r < dog.image.n_rows() - 1; r++) {
                 for (int c = 1; c < dog.image.n_cols() - 1; c++) {
                     float extrema = dog.image.at(r, c, 0);
-                    if (fabsf(extrema) < 0.5 * CONTRAST_THRESHOLD / pyramid_.s_) {
+                    if (extrema < 1.25 * CONTRAST_THRESHOLD) {
                         continue;
                     }
                     bool max = true, min = true;
@@ -36,10 +30,10 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
                                 if (o == 0 && wr == 0 && wc == 0) {
                                     continue;
                                 }
-                                if (pyramid_.dogs_[i][j+o].image.at(r+wr, c+wc, 0) > cmp_max) {
+                                if (pyramid_.dogs_[i][j+o].image.at(r+wr, c+wc, 0) >= cmp_max) {
                                     max = false;
                                 }
-                                if (pyramid_.dogs_[i][j+o].image.at(r+wr, c+wc, 0) < cmp_min) {
+                                if (pyramid_.dogs_[i][j+o].image.at(r+wr, c+wc, 0) <= cmp_min) {
                                     min = false;
                                 }
                             }
@@ -47,83 +41,73 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
                     }
                     
                     if (max || min) {
-//                        cout << "extrema" << endl;
-                        // add keypoint
                         Point p(c, r);
                         KeyPoint kp(p);
                         kp.octave = dog.octave;
                         kp.intvl = j;
                         
-                        
-                        if (!edgeResponse(kp, dog)) {
-                            Mat2d<float> offset(3, 1);
-                            Mat2d<float> jacobian(3, 1);
-//                            auto dog_iter_up = dog_up;
-//                            auto dog_iter = dog;
-//                            auto dog_iter_down = dog_down;
-                            
-                            bool converge = false;
-                            int t = 0;
-                            for (; t < SUBPIXEL_ITER; t++) {
-                                
-                                subPixelIter(i, kp.p.y, kp.p.x, kp.intvl, jacobian, offset);
-                                
-                                if (fabsf(offset[0][0]) < SUBPIXEL_CONVERGE_THRESHOLD
-                                    && fabsf(offset[1][0]) < SUBPIXEL_CONVERGE_THRESHOLD
-                                    && fabsf(offset[2][0]) < SUBPIXEL_CONVERGE_THRESHOLD) { // converge
-                                    converge = true;
-                                    break;
-                                }
-                                
-                                kp.p.x += roundf(offset[0][0]);
-                                kp.p.y += roundf(offset[1][0]);
-                                kp.intvl += roundf(offset[2][0]);
-                                
-                                if (kp.p.x < 1 || kp.p.x >= dog.image.n_cols()
-                                    || kp.p.y < 1 || kp.p.y >= dog.image.n_rows()
-                                    || kp.intvl < 1 || kp.intvl >= pyramid_.s_ + 1) {
-                                    break;
-                                }
+                        Mat2d<float> offset(3, 1);
+                        Mat2d<float> jacobian(3, 1);
+
+                        bool converge = false;
+                        int t = 0;
+                        for (; t < SUBPIXEL_ITER; t++) {
+
+                            subPixelIter(i, kp.p.y, kp.p.x, kp.intvl, jacobian, offset);
+
+                            if (fabsf(offset[0][0]) < SUBPIXEL_CONVERGE_THRESHOLD
+                                && fabsf(offset[1][0]) < SUBPIXEL_CONVERGE_THRESHOLD
+                                && fabsf(offset[2][0]) < SUBPIXEL_CONVERGE_THRESHOLD) { // converge
+                                converge = true;
+                                break;
                             }
-                            
-                            if (!converge) { // do not converge
-//                                cout << "passed" << endl;
-                                continue;
+
+                            kp.p.x += roundf(offset[0][0]);
+                            kp.p.y += roundf(offset[1][0]);
+                            kp.intvl += roundf(offset[2][0]);
+
+                            if (kp.p.x < 1 || kp.p.x >= dog.image.n_cols()
+                                || kp.p.y < 1 || kp.p.y >= dog.image.n_rows()
+                                || kp.intvl < 1 || kp.intvl >= pyramid_.s_ + 1) {
+                                break;
                             }
-                            // delta = -H^{-1} J, by second order Taylor expansion, D = D_hat - J^T delta + 0.5 delta^T H delta, substitute delta
-                            // D = D_hat - 0.5 J^T H^{-1} J = D_hat + 0.5 J^T delta
-                            float true_extrema = pyramid_.dogs_[i][kp.intvl].image.at(kp.p.y, kp.p.x, 0) + 0.5 * (jacobian.transpose() * offset)[0][0];
-                            
-                            if (fabsf(true_extrema) > CONTRAST_THRESHOLD / pyramid_.s_) {
-                                kp.p.x += offset[0][0];
-                                kp.p.y += offset[1][0];
-                                kp.sub_intvl = offset[2][0];
-                                kp.scale_oct = powf(2.f, i) * pyramid_.sigma_ * powf(2.f, (kp.intvl + kp.sub_intvl) / pyramid_.s_);
-                                key_points_.push_back(kp);
-                            }
+                        }
+
+                        if (!converge) { // do not converge
+                            continue;
+                        }
+                        // delta = -H^{-1} J, by second order Taylor expansion, D = D_hat - J^T delta + 0.5 delta^T H delta, substitute delta
+                        // D = D_hat - 0.5 J^T H^{-1} J = D_hat + 0.5 J^T delta
+                        float true_extrema = pyramid_.dogs_[i][kp.intvl].image.at(kp.p.y, kp.p.x, 0) + 0.5 * (jacobian.transpose() * offset)[0][0];
+                    
+                        if (fabsf(true_extrema) > CONTRAST_THRESHOLD && !edgeResponse(kp, dog)) {
+                            kp.p.x += offset[0][0];
+                            kp.p.y += offset[1][0];
+                            kp.sub_intvl = offset[2][0];
+                            kp.scale_oct = pyramid_.sigma_ * pow(pyramid_.scale_interval_, (kp.intvl + kp.sub_intvl) / (pyramid_.s_ + 3));
+                            key_points_.push_back(kp);
                         }
                     }
                 }
             }
-            
         }
     }
-    
+    std::cout << key_points_.size() << std::endl;
     // post processing, refine keypoints
     key_points_ = assignOrientation(key_points_);
-    
-    
+
+
     Image image = img.clone();
     for (int i = 0; i < key_points_.size(); i++) {
         Point p = key_points_[i].p;
-        p  *= powf(2, key_points_[i].octave);
-        drawCircle(image, p, RED, 3);
+        p  *= powf(pyramid_.scale_interval_, key_points_[i].octave);
+        drawCircle(image, p, Color(1, 0, 0), 3);
         Point p_target = p;
-        p_target.x += cosf(key_points_[i].orientation) * 3.f;
-        p_target.y -= sinf(key_points_[i].orientation) * 3.f;
+        p_target.x += cosf(key_points_[i].orientation) * 7.f;
+        p_target.y += sinf(key_points_[i].orientation) * 7.f;
         drawLine(image, p, p_target);
     }
-    
+
     imageShow(image);
     compute(key_points_, descriptors);
 }
@@ -131,19 +115,21 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
 bool SIFT::edgeResponse(const KeyPoint &kp, const DoG &dog) {
     // test principle curvatures ratio
     Point p = kp.p;
+    float val = dog.image.at(p.y, p.x, 0);
     // d(x+1) - dx
-    float dxx = dog.image.at(p.y, p.x+1, 0) + dog.image.at(p.y, p.x-1, 0) - 2 * dog.image.at(p.y, p.x, 0);
+    float dxx = dog.image.at(p.y, p.x+1, 0) + dog.image.at(p.y, p.x-1, 0) - 2 * val;
     // d(y+1) - dy
-    float dyy = dog.image.at(p.y+1, p.x, 0) + dog.image.at(p.y-1, p.x, 0) - 2 * dog.image.at(p.y, p.x, 0);
+    float dyy = dog.image.at(p.y+1, p.x, 0) + dog.image.at(p.y-1, p.x, 0) - 2 * val;
     // d(dx)y
     float dxy = (dog.image.at(p.y+1, p.x+1, 0) + dog.image.at(p.y-1, p.x-1, 0) - dog.image.at(p.y+1, p.x-1, 0) - dog.image.at(p.y-1, p.x+1, 0)) / 4.;
     
     float det = dxx * dyy - dxy * dxy;
-    if (det < 0) { // saddle point
+    if (det <= 0) { // saddle point
         return true;
     }
     float trace = dxx + dyy;
-    if (trace * trace / det < (EDGE_THRESHOLD + 1) * (EDGE_THRESHOLD + 1) / EDGE_THRESHOLD) {
+    float trace2 = trace * trace;
+    if (trace2 / det < (EDGE_THRESHOLD + 1) * (EDGE_THRESHOLD + 1) / EDGE_THRESHOLD) {
         return false;
     }
     return true;
@@ -200,9 +186,9 @@ void addGoodOriKeypoints(const std::vector<float>& hist, const float threshold, 
             float didi = hist[l] + hist[r] - 2 * hist[i];
             float offset = di / didi;
             float true_i = i + offset;
-            if (true_i < 0) true_i = true_i + ORI_HISTOGRAMS;
-            if (true_i >= ORI_HISTOGRAMS) true_i = true_i - ORI_HISTOGRAMS;
-            float true_ori = true_i / ORI_HISTOGRAMS * 2 * PI - PI;
+            if (true_i < 0) true_i += ORI_HISTOGRAMS;
+            if (true_i >= ORI_HISTOGRAMS) true_i -= ORI_HISTOGRAMS;
+            float true_ori = true_i / ORI_HISTOGRAMS * 2 * PI;
             
             // add it to keypoints
             KeyPoint kp = ref_kp;
@@ -219,7 +205,7 @@ std::vector<KeyPoint> SIFT::assignOrientation(const std::vector<KeyPoint> &kps) 
         int round_x = roundf(kp.p.x);
         int round_y = roundf(kp.p.y);
         
-        auto hist = histogram(pyramid_.gaussians_[kp.octave][kp.intvl].image, round_x, round_y, ORI_HISTOGRAMS, ORI_RADIUS * kp.scale_oct, ORI_SIGMA* kp.scale_oct);
+        auto hist = histogram(pyramid_.gaussians_[kp.octave][kp.intvl].image, round_x, round_y, ORI_HISTOGRAMS, roundf(ORI_SIGMA_RADIUS * kp.scale_oct), ORI_SIGMA* kp.scale_oct);
         
         for (int i = 0; i < ORI_SMOOTH_PASSES; i++) {
             smoothHist(hist);
@@ -236,23 +222,23 @@ std::vector<float> SIFT::histogram(const Image& img, int x, int y, int n, int ra
     std::vector<float> hist;
     hist.resize(n);
     
-    // not strictly circle
     // gaussian weights distribution
-    for (int i = -radius; i <= radius; i++) {
-        for (int j = -radius; j <= radius; j++) {
+    for (int i = -radius; i < radius; i++) {
+        for (int j = -radius; j < radius; j++) {
             if (x+i < 1 || x+i >= img.n_cols() - 1
                 || y+j < 1 || y +j >= img.n_rows() - 1) {
                 continue;
             }
+            if (i * i + j * j > radius * radius) continue;
             
             float dx = img.at(y+j, x+i+1, 0) - img.at(y+j, x+i-1, 0);
-            float dy = img.at(y+j-1, x+i, 0) - img.at(y+j+1, x+i, 0);
+            float dy = img.at(y+j+1, x+i, 0) - img.at(y+j-1, x+i, 0);
             float mag = sqrtf(powf(dx, 2.)
                               + powf(dy, 2));
-            float ori = atan2f(dy, dx);
+            float ori = atan2f(dy, dx) + PI;
             
             float weight = expf(-(i*i+j*j) / (2*sigma*sigma));
-            int bin = roundf(n * (ori + PI) / (2*PI));
+            int bin = roundf(n * ori / (2*PI));
             if (bin >= n) {
                 bin = 0;
             }
@@ -332,9 +318,9 @@ void SIFT::computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc) {
     float sin = sinf(ori);
     for (int x = -radius; x <= radius; x++) {
         for (int y = -radius; y <= radius; y++) {
-            // rotate base, ATTENTION: y coord is inversed
-            float x_rot = (cos * x - sin * y) / hist_diameter;
-            float y_rot = (sin * x + cos * y) / hist_diameter;
+            // rotate base
+            float x_rot = (cos * x + sin * y) / hist_diameter;
+            float y_rot = (-sin * x + cos * y) / hist_diameter;
             
             float x_bin = x_rot + DESC_SIDE / 2 - 0.5;
             float y_bin = y_rot + DESC_SIDE / 2 - 0.5;
@@ -345,13 +331,13 @@ void SIFT::computeOneKp(const KeyPoint& kp, std::vector<unsigned char>& desc) {
                 
                 int c = int(roundf(kp.p.x)) + x;
                 int r = int(roundf(kp.p.y)) + y;
-                if (r < 1 || r >= img.n_cols() - 1
-                    || c < 1 || c >= img.n_rows() - 1) {
+                if (r < 1 || r >= img.n_rows() - 1
+                    || c < 1 || c >= img.n_cols() - 1) {
                     continue;
                 }
                 
                 float dx = img.at(r, c+1, 0) - img.at(r, c-1, 0);
-                float dy = img.at(r-1, c, 0) - img.at(r+1, c, 0);
+                float dy = img.at(r+1, c, 0) - img.at(r-1, c, 0);
                 float mag = sqrtf(powf(dx, 2.)
                                   + powf(dy, 2));
                 float grad_ori = atan2f(dy, dx);

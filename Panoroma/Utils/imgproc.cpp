@@ -8,17 +8,19 @@
 
 #include "imgproc.hpp"
 #include "Debugger.hpp"
+#include "SIFT.hpp"
 
-Mat2d<double> getGaussianKernel(float sigma) {
-    int radius = ceil(3 * sigma);
-    Mat2d<double> kernel(2*radius+1, 2*radius+1);
-    float sigma2 = 2 * powf(sigma, 2);
-    for (int i = 0; i < 2 * radius + 1; i++) {
-        for (int j = 0; j < 2 * radius + 1; j++) {
-            kernel[i][j] = expf((-pow(abs(i-radius), 2)-pow(abs(j-radius), 2)) / sigma2);
-        }
+vector<float> getGaussianKernel(float sigma) {
+    int double_radius = ceil(0.3 * (sigma / 2 - 1) + 0.8) * 6;
+    if (double_radius % 2 == 0) double_radius++;
+    vector<float> kernel(double_radius, 0.f);
+    float sigma2 = 2 * sigma * sigma;
+    float sum = 0;
+    for (int i = 0; i < double_radius; i++) {
+        kernel[i] = expf(-(i - double_radius / 2) * (i - double_radius / 2) / sigma2);
+        sum += kernel[i];
     }
-    kernel.normalizeSum();
+    std::transform(kernel.begin(), kernel.end(), kernel.begin(), [=](float v) -> float {return v / sum;});
     return kernel;
 }
 
@@ -27,7 +29,7 @@ Image rgb2gray(const Image& mat) {
     Image result(mat.n_rows(), mat.n_cols(), 1);
     for (int i = 0; i < result.n_rows(); i++) {
         for (int j = 0; j < result.n_cols(); j++) {
-            result.at(i, j, 0) = mat.at(i, j, 0) * 0.299 + mat.at(i, j, 1) * 0.587 + mat.at(i, j, 2) * 0.114;
+            result.at(i, j, 0) = mat.at(i, j, 0);
         }
     }
     return result;
@@ -73,20 +75,26 @@ void drawCircle(Image& img, Point point, Color color, int radius, bool fill) {
 
 Image gaussianBlur(const Image& mat, float sigma) {
     auto kernel = getGaussianKernel(sigma);
-    int radius = kernel.n_rows() / 2;
-    Image result(mat.n_rows(), mat.n_cols(), mat.n_channels());
+    int radius = (int)kernel.size() / 2;
+    Image result(mat.n_rows(), mat.n_cols(), mat.n_channels()), tmp(mat.n_rows(), mat.n_cols(), mat.n_channels());
     for (int i = 0; i < mat.n_rows(); i++) {
         for (int j = 0; j < mat.n_cols(); j++) {
             for (int c = 0; c < result.n_channels(); c++) {
                 float conv = 0;
                 for (int m = -radius; m <= radius; m++) {
-                    for (int n = -radius; n <= radius; n++) {
-                        float pixel = 0;
-                        if (i+m >= 0 && i+m < mat.n_rows() && j+n >= 0 && j+n < mat.n_cols()) {
-                            pixel = mat.at(i+m, j+n, c);
-                        }
-                        conv += pixel * kernel[m+radius][n+radius];
-                    }
+                    conv += mat.at(i, std::min(std::max(j + m, 0), mat.n_cols() - 1), c) * kernel[m+radius];
+                }
+                tmp.at(i, j, c) = conv;
+            }
+        }
+    }
+    
+    for (int j = 0; j < mat.n_cols(); j++) {
+        for (int i = 0; i < mat.n_rows(); i++) {
+            for (int c = 0; c < result.n_channels(); c++) {
+                float conv = 0;
+                for (int m = -radius; m <= radius; m++) {
+                    conv += tmp.at(std::min(std::max(i + m, 0), tmp.n_rows() - 1), j, c) * kernel[m+radius];
                 }
                 result.at(i, j, c) = conv;
             }
@@ -95,58 +103,92 @@ Image gaussianBlur(const Image& mat, float sigma) {
     return result;
 }
 
-Image downSample(const Image& mat, float ratio) {
-    Image result(mat.n_rows() / ratio, mat.n_cols() / ratio, mat.n_channels());
-    for (int i = 0; i < result.n_rows(); i++) {
-        for (int j = 0; j < result.n_cols(); j++) {
-            for (int c = 0; c < result.n_channels(); c++) {
-                result.at(i, j, c) = mat.at(i * ratio, j * ratio, c);
+void resize(const Image& mat, Image& out) {
+    float ratio_y = mat.n_rows() / (float)out.n_rows();
+    float ratio_x = mat.n_cols() / (float)out.n_cols();
+    
+    vector<float> src_idx_y(out.n_rows(), 0);
+    vector<float> src_idx_x(out.n_cols(), 0);
+    for (int i = 0; i < out.n_rows(); i++) {
+        // convert to continous domain
+        src_idx_y[i] = std::min(std::max((i + 0.5f) * ratio_y - 0.5f, 0.f), mat.n_rows() - 1.f);
+    }
+
+    for (int j = 0; j < out.n_cols(); j++) {
+        src_idx_x[j] = std::min(std::max((j + 0.5f) * ratio_x - 0.5f, 0.f), mat.n_cols() - 1.f);
+    }
+    
+    for (int i = 0; i < out.n_rows(); i++) {
+        int idx_y = int(src_idx_y[i]);
+        float interp_y = src_idx_y[i] - idx_y;
+        if (idx_y >= mat.n_rows() - 1) {
+            idx_y = mat.n_rows() - 2;
+            idx_y = 1.f;
+        }
+        for (int j = 0; j < out.n_cols(); j++) {
+            int idx_x = int(src_idx_x[j]);
+            float interp_x = src_idx_x[j] - idx_x;
+            if (idx_x >= mat.n_cols() - 1) {
+                idx_x = mat.n_cols() - 2;
+                interp_x = 1.f;
+            }
+            for (int k = 0; k < out.n_channels(); k++) {
+                out.at(i, j, k) = (1.f - interp_x) * ((1.f - interp_y) * mat.at(idx_y, idx_x, k) + interp_y * mat.at(idx_y + 1, idx_x, k))
+                    + interp_x * ((1.f - interp_y) * mat.at(idx_y, idx_x + 1, k) + interp_y * mat.at(idx_y + 1, idx_x + 1, k));
             }
         }
     }
+}
+
+Image downSample(const Image& mat, double ratio) {
+    Image result(ceil(mat.n_rows() / ratio), ceil(mat.n_cols() / ratio), mat.n_channels());
+    resize(mat, result);
     return result;
 }
 
-Image upSample(const Image& mat, float ratio, bool interp) {
-    Image result(mat.n_rows() * ratio, mat.n_cols() * ratio, mat.n_channels());
-    if (!interp) {
-        for (int i = 0; i < result.n_rows(); i++) {
-            for (int j = 0; j < result.n_cols(); j++) {
-                for (int c = 0; c < result.n_channels(); c++) {
-                    result.at(i, j, c) = mat.at(i / ratio, j / ratio, c);
-                }
+Image upSample(const Image& mat, double ratio) {
+    Image result(ceil(mat.n_rows() * ratio), ceil(mat.n_cols() * ratio), mat.n_channels());
+    resize(mat, result);
+    return result;
+}
+
+
+Image drawMatches(const Image& img1, const Image& img2, SIFT sift1, SIFT sift2, const std::vector<int>& matches) {
+    Image img(std::max(img1.n_rows(), img2.n_rows()), img1.n_cols() + img2.n_cols(), img1.n_channels());
+    for (int i = 0; i < img1.n_rows(); i++) {
+        for (int j = 0; j < img1.n_cols(); j++) {
+            for (int k = 0; k < img1.n_channels(); k++) {
+                img.at(i, j, k) = img1.at(i, j, k);
             }
         }
-    } else {
-        for (int i = 0; i < result.n_rows(); i++) {
-            for (int j = 0; j < result.n_cols(); j++) {
-                for (int c = 0; c < result.n_channels(); c++) {
-                    int low_i = i / ratio, high_i = int(i / ratio) + 1;
-                    int low_j = j / ratio, high_j = int(j / ratio) + 1;
-                    if (high_i >= mat.n_rows()) {
-                        high_i = low_i;
-                    }
-                    if (high_j >= mat.n_cols()) {
-                        high_j = low_j;
-                    }
-                    // bilinear interpolation
-                    auto ll = mat.at(low_i, low_j, c);
-                    auto lh = mat.at(low_i, high_j, c);
-                    auto hl = mat.at(high_i, low_j, c);
-                    auto hh = mat.at(high_i, high_j, c);
-                    
-                    float interp_row = (i - low_i * ratio) / ratio;
-                    float interp_col = (j - low_j * ratio) / ratio;
-                    
-                    auto l = ll * interp_col + lh * (1 - interp_col);
-                    auto h = hl * interp_col + hh * (1 - interp_col);
-                    result.at(i, j, c) = l * interp_row + h * (1 - interp_row);
-                }
+    }
+    for (int i = 0; i < img2.n_rows(); i++) {
+        for (int j = img1.n_cols(); j < img1.n_cols() + img2.n_cols(); j++) {
+            for (int k = 0; k < img2.n_channels(); k++) {
+                img.at(i, j, k) = img2.at(i, j - img1.n_cols(), k);
             }
         }
     }
     
-
-    return result;
+    vector<Point> pts1, pts2;
+    for (int i = 0; i < sift1.key_points_.size(); i++) {
+        Point p = sift1.key_points_[i].p;
+        p  *= powf(SCALE_INTERVAL, sift1.key_points_[i].octave);
+        drawCircle(img, p, Color(1, 0, 0), 3);
+        pts1.push_back(std::move(p));
+    }
+    for (int i = 0; i < sift2.key_points_.size(); i++) {
+        Point p = sift2.key_points_[i].p;
+        p  *= powf(SCALE_INTERVAL, sift2.key_points_[i].octave);
+        p.x += img1.n_cols();
+        drawCircle(img, p, Color(1, 0, 0), 3);
+        pts2.push_back(std::move(p));
+    }
+    for (int i = 0; i < matches.size(); i++) {
+        if (matches[i] >= 0) {
+            drawLine(img, pts1[i], pts2[matches[i]]);
+        }
+    }
+    
+    return img;
 }
-

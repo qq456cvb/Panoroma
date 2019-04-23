@@ -87,6 +87,18 @@ public:
         return result;
     }
     
+    Mat3d<T> abs_diff(const Mat3d<T>& mat) {
+        Mat3d<T> result(mat.n_rows(), mat.n_cols(), mat.n_channels());
+        for (int i = 0; i < mat.n_rows(); i++) {
+            for (int j = 0; j < mat.n_cols(); j++) {
+                for (int c = 0; c < mat.n_channels(); c++) {
+                    result.at(i, j, c) = fabsf(this->at(i, j, c) - mat.at(i, j, c));
+                }
+            }
+        }
+        return result;
+    }
+    
     Mat3d<T> clone() const {
         Mat3d<T> mat(this->n_rows_, this->n_cols_, this->n_channels_);
         mat.raw_data_.reset(new T[this->n_elems_], std::default_delete<T[]>());
