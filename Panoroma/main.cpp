@@ -13,6 +13,7 @@
 #include "imgio.hpp"
 #include "imgproc.hpp"
 #include "SIFT.hpp"
+#include "RANSAC.hpp"
 using namespace std;
 
 int main(int argc, const char * argv[]) {
@@ -73,7 +74,13 @@ int main(int argc, const char * argv[]) {
         }
     }
     imageShow(drawMatches(img1, img2, sift1, sift2, matches));
-    
+    vector<Point> pts1, pts2;
+    for (size_t i = 0; i < matches.size(); ++i) {
+        pts1.emplace_back(sift1.key_points_[i].p.x, sift1.key_points_[i].p.y);
+        pts2.emplace_back(sift2.key_points_[matches[i]].p.x, sift2.key_points_[matches[i]].p.y);
+    }
+    auto ransac = RANSACHomoSolver();
+    ransac.solve(pts1, pts2);
     
 //    char cmd[128] = "convert";
 //    FILE* pipe = popen(cmd, "r");
