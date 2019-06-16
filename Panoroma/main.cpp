@@ -19,8 +19,8 @@ using namespace std;
 int main(int argc, const char * argv[]) {
 //    Mat3d<unsigned char> img(300, 200, 3);
     
-    auto img1 = readImage("test2.jpeg");
-    auto img2 = readImage("test1.jpeg");
+    auto img1 = readImage("test1.jpeg");
+    auto img2 = readImage("test2.jpeg");
 //    Mat3d<unsigned char> lena(300, 200, 3);
 //    lena.set_all(128);
 //    Image draw = lena.clone();
@@ -131,12 +131,12 @@ int main(int argc, const char * argv[]) {
             pt[1][0] = float(i) / img2.n_rows();
             pt[2][0] = 1.f;
             auto transformed = homo * pt;
-            Hx.at(min(max(transformed[1][0] / transformed[2][0] * img2.n_rows() - min_y, 0.f), Hx.n_rows() - 1.f), min(max(transformed[0][0] / transformed[2][0] * img2.n_cols() - min_x, 0.f), Hx.n_cols() - 1.f), 0)= img2.at(i, j, 0);
+            Hx.at(min(max(transformed[1][0] / transformed[2][0] * img2.n_rows() - min(min_y, 0), 0.f), Hx.n_rows() - 1.f), min(max(transformed[0][0] / transformed[2][0] * img2.n_cols() - min(min_x, 0), 0.f), Hx.n_cols() - 1.f), 0)= img2.at(i, j, 0);
         }
     }
     for (size_t i = 0; i < img1.n_rows(); ++i) {
         for (size_t j = 0; j < img1.n_cols(); ++j) {
-            Hx.at(i + abs(min_y), j + abs(min_x), 0) = img1.at(i, j, 0);
+            Hx.at(i - min(min_y, 0), j - min(min_x, 0), 0) = img1.at(i, j, 0);
         }
     }
     std::cout << Hx.n_cols() << ", " << Hx.n_rows() << std::endl;
