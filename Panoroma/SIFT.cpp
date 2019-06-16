@@ -97,18 +97,18 @@ void SIFT::extract(const Image &img, Mat2d<unsigned char> &descriptors) {
     key_points_ = assignOrientation(key_points_);
 
 
-    Image image = img.clone();
-    for (int i = 0; i < key_points_.size(); i++) {
-        Point p = key_points_[i].p;
-        p  *= powf(pyramid_.scale_interval_, key_points_[i].octave);
-        drawCircle(image, p, Color(1, 0, 0), 3);
-        Point p_target = p;
-        p_target.x += cosf(key_points_[i].orientation) * 7.f;
-        p_target.y += sinf(key_points_[i].orientation) * 7.f;
-        drawLine(image, p, p_target);
-    }
+//    Image image = img.clone();
+//    for (int i = 0; i < key_points_.size(); i++) {
+//        Point p = key_points_[i].p;
+//        p  *= powf(pyramid_.scale_interval_, key_points_[i].octave);
+//        drawCircle(image, p, Color(1, 0, 0), 3);
+//        Point p_target = p;
+//        p_target.x += cosf(key_points_[i].orientation) * 7.f;
+//        p_target.y += sinf(key_points_[i].orientation) * 7.f;
+//        drawLine(image, p, p_target);
+//    }
 
-    imageShow(image);
+//    imageShow(image);
     compute(key_points_, descriptors);
 }
 

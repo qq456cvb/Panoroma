@@ -128,7 +128,7 @@ public:
     
     Mat2d<T> operator*(const Mat2d<T>& mat) {
         Mat2d<T> result(this->n_rows(), mat.n_cols());
-       EigenMatrix(result) =  EigenMatrix(*this) * EigenMatrix(mat);
+        EigenMatrix(result) =  EigenMatrix(*this) * EigenMatrix(mat);
         return result;
     }
     
@@ -216,9 +216,5 @@ std::istream& operator>>(std::istream& is, const Mat2d<T>& mat)
     }
     return is;
 }
-
-#define Mat22d Mat<double>(2, 2)
-#define Mat33d Mat<double>(3, 3)
-#define Mat44d Mat<double>(4, 4)
 
 #endif /* Mat2d_hpp */

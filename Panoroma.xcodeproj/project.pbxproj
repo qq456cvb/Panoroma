@@ -10,6 +10,7 @@
 		9F26F2562269A08D009EAC7A /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F26F2552269A08D009EAC7A /* libjpeg.9.dylib */; };
 		9F26F258226D8FA3009EAC7A /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F26F257226D8FA3009EAC7A /* libpng16.16.dylib */; };
 		9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */; };
+		9F79D82622B52C5B00AD6F06 /* RANSAC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F79D82422B52C5B00AD6F06 /* RANSAC.cpp */; };
 		9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F519C1DD0D47800FAE304 /* main.cpp */; };
 		9F7F51A61DD10B4B00FAE304 /* Mat2d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */; };
 		9F7F51AA1DD1825700FAE304 /* Debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F7F51A81DD1825700FAE304 /* Debugger.cpp */; };
@@ -62,6 +63,8 @@
 		9F26F291226DC3DF009EAC7A /* libgtk-x11-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgtk-x11-2.0.0.dylib"; path = "../../../../../usr/local/Cellar/gtk+/2.24.28/lib/libgtk-x11-2.0.0.dylib"; sourceTree = "<group>"; };
 		9F2E2AE61DD4EF380091B3B7 /* GaussianPyramid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GaussianPyramid.cpp; sourceTree = "<group>"; };
 		9F2E2AE71DD4EF380091B3B7 /* GaussianPyramid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GaussianPyramid.hpp; sourceTree = "<group>"; };
+		9F79D82422B52C5B00AD6F06 /* RANSAC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RANSAC.cpp; sourceTree = "<group>"; };
+		9F79D82522B52C5B00AD6F06 /* RANSAC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RANSAC.hpp; sourceTree = "<group>"; };
 		9F7F51991DD0D47800FAE304 /* Panoroma */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Panoroma; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F7F519C1DD0D47800FAE304 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9F7F51A41DD10B4B00FAE304 /* Mat2d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mat2d.cpp; sourceTree = "<group>"; };
@@ -123,6 +126,8 @@
 				9F7F51B11DD28EA900FAE304 /* feature2d */,
 				9F7F51A31DD10B2A00FAE304 /* utils */,
 				9F7F519C1DD0D47800FAE304 /* main.cpp */,
+				9F79D82422B52C5B00AD6F06 /* RANSAC.cpp */,
+				9F79D82522B52C5B00AD6F06 /* RANSAC.hpp */,
 			);
 			path = Panoroma;
 			sourceTree = "<group>";
@@ -267,6 +272,7 @@
 				9F7F519D1DD0D47800FAE304 /* main.cpp in Sources */,
 				9F2E2AE81DD4EF380091B3B7 /* GaussianPyramid.cpp in Sources */,
 				9F7F51B01DD287DF00FAE304 /* Mat3d.cpp in Sources */,
+				9F79D82622B52C5B00AD6F06 /* RANSAC.cpp in Sources */,
 				9F7F51B71DD2D87300FAE304 /* imgproc.cpp in Sources */,
 				9FB95CEF1DDA17BB0041DC8D /* SIFT.cpp in Sources */,
 			);

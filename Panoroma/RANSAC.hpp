@@ -19,8 +19,8 @@ class RANSACHomoSolver {
 public:
     int n_trial = 500;
     int min_corres = 4;
-    float err_thresh = 3;
-    Eigen::Matrix3f solve(const vector<Point> &pts1, const vector<Point> &pts2);
+    float err_thresh = 0.02;
+    Mat2d<float> solve(const vector<Point> &pts1, const vector<Point> &pts2);
 };
 
 #endif /* RANSAC_hpp */

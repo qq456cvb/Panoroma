@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <memory>
+#include <iostream>
 #include <cstdarg>
 
 template <typename T>
@@ -69,7 +70,6 @@ public:
     int* dims() const {
         return dims_.get();
     }
-
 
 };
 #endif /* MatXd_hpp */

@@ -8,9 +8,9 @@
 
 #include <Eigen/SVD>
 #include "RANSAC.hpp"
-Eigen::Matrix3f RANSACHomoSolver::solve(const vector<Point> &pts1, const vector<Point> &pts2) {
-    srand(time(nullptr));
-    Eigen::Matrix3f best_homo;
+Mat2d<float> RANSACHomoSolver::solve(const vector<Point> &pts1, const vector<Point> &pts2) {
+    srand((unsigned int)time(nullptr));
+    Mat2d<float> best_homo(3, 3);
     Eigen::MatrixXf A(2 * min_corres, 9);
     int best_match = std::numeric_limits<int>::min();
     for (size_t i = 0; i < n_trial; ++i) {
@@ -52,8 +52,10 @@ Eigen::Matrix3f RANSACHomoSolver::solve(const vector<Point> &pts1, const vector<
             }
         }
         if (inlier_cnt > best_match) {
+            best_match = inlier_cnt;
+            // TODO: re-estimate homography with all inliers
+            std::copy(h.data(), h.data() + 9, best_homo.raw_ptr());
             std::cout << "found best with inlier cnt: " << inlier_cnt << std::endl;
-            best_homo = h;
         }
     }
     return best_homo;

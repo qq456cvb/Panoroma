@@ -19,8 +19,8 @@ using namespace std;
 int main(int argc, const char * argv[]) {
 //    Mat3d<unsigned char> img(300, 200, 3);
     
-    auto img1 = readImage("test1.jpeg");
-    auto img2 = readImage("test2.jpeg");
+    auto img1 = readImage("test2.jpeg");
+    auto img2 = readImage("test1.jpeg");
 //    Mat3d<unsigned char> lena(300, 200, 3);
 //    lena.set_all(128);
 //    Image draw = lena.clone();
@@ -75,16 +75,73 @@ int main(int argc, const char * argv[]) {
     }
     imageShow(drawMatches(img1, img2, sift1, sift2, matches));
     vector<Point> pts1, pts2;
+//    pts1.emplace_back(0.f, 0.f);
+//    pts1.emplace_back(1.f, 0.f);
+//    pts1.emplace_back(1.f, 1.f);
+//    pts1.emplace_back(0.f, 1.f);
+//
+//    pts2.emplace_back(0.f, 0.f);
+//    pts2.emplace_back(1.f, 0.5f);
+//    pts2.emplace_back(1.f, 1.f);
+//    pts2.emplace_back(0.f, 0.5f);
     for (size_t i = 0; i < matches.size(); ++i) {
-        pts1.emplace_back(sift1.key_points_[i].p.x, sift1.key_points_[i].p.y);
-        pts2.emplace_back(sift2.key_points_[matches[i]].p.x, sift2.key_points_[matches[i]].p.y);
+        if (matches[i] >= 0) {
+            pts1.emplace_back(sift1.key_points_[i].p.x * powf(SCALE_INTERVAL, sift1.key_points_[i].octave) / img2.n_cols(), sift1.key_points_[i].p.y * powf(SCALE_INTERVAL, sift1.key_points_[i].octave) / img2.n_rows());
+            pts2.emplace_back(sift2.key_points_[matches[i]].p.x * powf(SCALE_INTERVAL, sift2.key_points_[matches[i]].octave) / img2.n_cols(), sift2.key_points_[matches[i]].p.y * powf(SCALE_INTERVAL, sift2.key_points_[matches[i]].octave) / img2.n_rows());
+        }
     }
     auto ransac = RANSACHomoSolver();
-    ransac.solve(pts1, pts2);
+    auto homo = ransac.solve(pts1, pts2);
+    std::cout << homo << std::endl;
+    Mat2d<float> corners[4] = {Mat2d<float>(3 ,1), Mat2d<float>(3 ,1), Mat2d<float>(3 ,1), Mat2d<float>(3 ,1)};
+    corners[0][0][0] = 0.f;
+    corners[0][1][0] = 0.f;
+    corners[0][2][0] = 1.f;
     
-//    char cmd[128] = "convert";
-//    FILE* pipe = popen(cmd, "r");
-//    Assert(true);
+    corners[1][0][0] = 0.f;
+    corners[1][1][0] = 1.f;
+    corners[1][2][0] = 1.f;
+    
+    corners[2][0][0] = 1.f;
+    corners[2][1][0] = 1.f;
+    corners[2][2][0] = 1.f;
+    
+    corners[3][0][0] = 1.f;
+    corners[3][1][0] = 0;
+    corners[3][2][0] = 1.f;
+    int min_x = std::numeric_limits<int>::max();
+    int min_y = std::numeric_limits<int>::max();
+    int max_x = std::numeric_limits<int>::min();
+    int max_y = std::numeric_limits<int>::min();
+    for (size_t i = 0; i < 4; ++i) {
+        corners[i] = homo * corners[i];
+        corners[i][0][0] /= corners[i][2][0];
+        corners[i][1][0] /= corners[i][2][0];
+        min_x = min(min_x, int(corners[i][0][0] * img2.n_cols() - 1));
+        min_y = min(min_y, int(corners[i][1][0] * img2.n_rows() - 1));
+        max_x = max(max_x, int(corners[i][0][0] * img2.n_cols() + 1));
+        max_y = max(max_y, int(corners[i][1][0] * img2.n_rows() + 1));
+        std::cout << corners[i] << std::endl;
+    }
+    Image Hx(max(max_y, img1.n_rows()) - min(min_y, 0), max(max_x, img1.n_cols()) - min(min_x, 0), 1);
+    for (size_t i = 0; i < img2.n_rows(); ++i) {
+        for (size_t j = 0; j < img2.n_cols(); ++j) {
+            Mat2d<float> pt(3, 1);
+            pt[0][0] = float(j) / img2.n_cols();
+            pt[1][0] = float(i) / img2.n_rows();
+            pt[2][0] = 1.f;
+            auto transformed = homo * pt;
+            Hx.at(min(max(transformed[1][0] / transformed[2][0] * img2.n_rows() - min_y, 0.f), Hx.n_rows() - 1.f), min(max(transformed[0][0] / transformed[2][0] * img2.n_cols() - min_x, 0.f), Hx.n_cols() - 1.f), 0)= img2.at(i, j, 0);
+        }
+    }
+    for (size_t i = 0; i < img1.n_rows(); ++i) {
+        for (size_t j = 0; j < img1.n_cols(); ++j) {
+            Hx.at(i + abs(min_y), j + abs(min_x), 0) = img1.at(i, j, 0);
+        }
+    }
+    std::cout << Hx.n_cols() << ", " << Hx.n_rows() << std::endl;
+    // TODO: anti-aliasing
+    imageShow(Hx);
     
     return 0;
 }
